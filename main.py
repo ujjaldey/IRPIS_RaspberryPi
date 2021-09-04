@@ -1,10 +1,21 @@
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+from app.telegrambot import TelegramBot
+from util.config import Config
+from util.logger import Logger
 
 
-# Press the green button in the gutter to run the script.
+class Main:
+  def __init__(self):
+    logger = Logger(__file__)
+    self.logger = logger.get_logger()
+
+    self.config = Config()
+    self.db = None  # Config()  # @ TODO
+
+  def start(self):
+    self.logger.info("Starting IRPIS_RaspberryPi")
+    telegram_bot = TelegramBot(self.config, self.logger, self.db)
+
+
 if __name__ == '__main__':
-    print_hi('PyCharm!')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+  main = Main()
+  main.start()
