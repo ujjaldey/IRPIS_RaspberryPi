@@ -1,6 +1,9 @@
 from app.bot.telegrambot import TelegramBot
 import json
 
+TYPE_COMMAND = 'COMMAND'
+TYPE_ALIVE = 'ALIVE'
+
 
 class MqttBrokerHelper:
     def _set_logger(self, logger):
@@ -10,17 +13,32 @@ class MqttBrokerHelper:
         self.config = config
 
     def _on_connect(self, mqtt_broker, client, userdata, rc):
-        self.logger.info(f"Connected to MQTT broker with result code {str(rc)}")
+        self.logger.info(f'Connected to MQTT broker with result code {str(rc)}')
         mqtt_broker.subscribe(self.config.get_mqtt_response_topic())
 
     def _on_message(self, client, userdata, msg):
-        print("Topic: ", msg.topic + "\nMessage: " + str(msg.payload))
-        msg_sender, msg_success, msg_type, msg_status, resp_message = \
-            self.__parse_response(str(msg.payload.decode("utf-8")))
+        msg_str = str(msg.payload.decode('utf-8'))
+        self.logger.info(f'Received topic {msg.topic} with message: {msg_str}')
 
-        if msg.topic == "irpis/esp8266/response" and "COMMAND" in str(msg.payload):
-            telegram_bot = TelegramBot(self.config, self.logger)
-            telegram_bot.send_response(msg_success, msg_status, resp_message)
+        telegram_bot = TelegramBot(self.config, self.logger)
+
+        resp_sender, resp_success, resp_type, resp_status, resp_message = \
+            self.__parse_response(msg_str)
+
+        if self.__validate_response(self.config.get_mqtt_response_topic(), self.config.get_mqtt_sender(), msg.topic,
+                                    resp_type, resp_sender):
+            if resp_type == TYPE_COMMAND:
+                success_str = '' if resp_success else 'could not be '
+                status_str = resp_status.lower()
+                message = f'Irrigation {success_str}turned {status_str}!'
+
+                if not resp_success:
+                    message += '\nError: ' + resp_message
+
+                telegram_bot.send_response(message)
+        else:
+            message = 'Invalid response'
+            telegram_bot.send_response(message)
 
     @staticmethod
     def __parse_response(response):
@@ -34,3 +52,7 @@ class MqttBrokerHelper:
         resp_success = resp_success_str == 'true'
 
         return resp_sender, resp_success, resp_type, resp_status, resp_message
+
+    @staticmethod
+    def __validate_response(mqtt_topic, mqtt_sender, topic, type, sender):
+        return sender == mqtt_sender and topic == mqtt_topic and type in [TYPE_COMMAND, TYPE_ALIVE]

@@ -13,7 +13,7 @@ class Main:
         self.db = None  # Config()  # @ TODO
 
     def start(self):
-        self.logger.info("Starting IRPIS_RaspberryPi")
+        self.logger.info('Starting IRPIS_RaspberryPi')
 
         mqtt_borker = MqttBroker(self.config, self.logger)
         mqtt = mqtt_borker.connect()

@@ -4,7 +4,7 @@ import os
 
 class Logger:
     def __init__(self, file_name):
-        formatter = logging.Formatter("%(asctime)s|%(levelname)s|%(message)s", "%Y-%m-%d %H:%M:%S")
+        formatter = logging.Formatter('%(asctime)s|%(levelname)s|%(message)s', '%Y-%m-%d %H:%M:%S')
 
         logger = logging.getLogger(__name__)
         logger.setLevel(logging.DEBUG)
@@ -26,8 +26,8 @@ class Logger:
     @staticmethod
     def __get_log_file_name(file_name):
         path = os.path.dirname(os.path.abspath(file_name))
-        log_path = os.path.join(path, "log")
+        log_path = os.path.join(path, 'log')
         if not os.path.exists(log_path):
             os.mkdir(log_path)
 
-        return os.path.join(log_path, os.path.basename(file_name).replace(".py", ".log"))
+        return os.path.join(log_path, os.path.basename(file_name).replace('.py', '.log'))

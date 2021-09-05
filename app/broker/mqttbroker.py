@@ -15,7 +15,7 @@ class MqttBroker(MqttBrokerHelper):
         mqtt_user = self.config.get_mqtt_user()
         mqtt_password = self.config.get_mqtt_password()
 
-        self.logger.info(f"Connecting to MQTT broker {mqtt_server}")
+        self.logger.info(f'Connecting to MQTT broker {mqtt_server}')
         self.client.connect(mqtt_server, mqtt_port, 60)
         self.client.username_pw_set(mqtt_user, mqtt_password)
 

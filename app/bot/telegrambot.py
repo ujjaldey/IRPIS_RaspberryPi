@@ -27,12 +27,5 @@ class TelegramBot(TelegramBotHelper):
         self.updater.start_polling()
         self.updater.idle()
 
-    def send_response(self, success, status, response):
-        success_str = '' if success else 'could not be '
-        status_str = status.lower()
-        message = f'Irrigation {success_str}turned {status_str}!'
-
-        if not success:
-            message += '\nError: ' + response
-
+    def send_response(self, message):
         self._send_response(message)

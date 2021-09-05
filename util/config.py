@@ -31,3 +31,6 @@ class Config:
 
     def get_mqtt_response_topic(self):
         return self.config['MQTT_RESPONSE_TOPIC']
+
+    def get_mqtt_sender(self):
+        return self.config['MQTT_SENDER']
