@@ -34,7 +34,8 @@ class TelegramBotHelper:
         response_msg = 'OK. Turning the irrigation on...'
         context.bot.send_message(chat_id=self.config.get_telegram_chat_id(), text=response_msg)
 
-        self.mqtt.publish("irpis/esp8266/command", "{\"sender\": \"IRPIS-RPI\", \"action\": \"ON\", \"duration\": 20}")
+        self.mqtt.publish(self.config.get_mqtt_command_topic(),
+                          "{\"sender\": \"IRPIS-RPI\", \"action\": \"ON\", \"duration\": 20}")
 
     def _off(self, update: Update, context: CallbackContext):
         self.logger.info('_off is called')
@@ -42,7 +43,7 @@ class TelegramBotHelper:
         response_msg = 'OK. Turning the irrigation off...'
         context.bot.send_message(chat_id=self.config.get_telegram_chat_id(), text=response_msg)
 
-        self.mqtt.publish("irpis/esp8266/command", "{\"sender\": \"IRPIS-RPI\", \"action\": \"OFF\"}")
+        self.mqtt.publish(self.config.get_mqtt_command_topic(), "{\"sender\": \"IRPIS-RPI\", \"action\": \"OFF\"}")
 
     def _send_response(self, message):
         self.updater.bot.send_message(chat_id=self.config.get_telegram_chat_id(), text=message)
