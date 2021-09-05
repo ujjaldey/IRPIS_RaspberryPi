@@ -11,6 +11,9 @@ class Config:
     def get_telegram_api_key(self):
         return self.config['TELEGRAM_API_KEY']
 
+    def get_telegram_chat_id(self):
+        return self.config['TELEGRAM_CHAT_ID']
+
     def get_mqtt_server(self):
         return self.config['MQTT_SERVER']
 
