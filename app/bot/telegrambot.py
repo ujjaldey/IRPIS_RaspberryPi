@@ -25,7 +25,6 @@ class TelegramBot(TelegramBotHelper):
 
     def start(self):
         self.updater.start_polling()
-        self.updater.idle()
 
     def send_response(self, message):
         self._send_response(message)
