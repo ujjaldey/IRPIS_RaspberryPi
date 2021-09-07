@@ -1,3 +1,7 @@
+import re
+from datetime import datetime
+
+from dateutil import parser
 from telegram import Update
 from telegram.ext import CallbackContext
 
@@ -35,18 +39,25 @@ class TelegramBotHelper:
             response_msg = 'Enter the duration!'
             success = False
         else:
-            duration_str = context.args[0]
+            # duration_str = context.args[0]
+            #
+            # if len(context.args) > 1:
+            #     duration_str = context.args[0] + context.args[1]
 
-            if len(context.args) > 1:
-                duration_str = context.args[0] + context.args[1]
+            try:
+                duration_str = " ".join(context.args)
+                print(duration_str)
 
-            duration = self.__convert_duration_to_secs(duration_str.lower())
-            print(duration)
+                duration = self.__convert_duration_to_secs(duration_str.lower())
+                print(duration)
 
-            if duration > 0:
-                response_msg = f'OK. Turning the irrigation on for {self.__convert_secs_to_human_format(duration)}...'
-                success = True
-            else:
+                if duration > 0:
+                    response_msg = f'OK. Turning the irrigation on for {self.__convert_secs_to_human_format(duration)}...'
+                    success = True
+                else:
+                    response_msg = 'Invalid duration!'
+                    success = False
+            except Exception as ex:
                 response_msg = 'Invalid duration!'
                 success = False
 
@@ -69,35 +80,36 @@ class TelegramBotHelper:
 
     @staticmethod
     def __convert_duration_to_secs(duration_str):
-        count = duration_str.count(':')
+        rep = {"h": ["hours", "hour", "hrs", "hr"],
+               "m": ["minutes", "minute", "mins", "min", "mis", "mi"],
+               "s": ["seconds", "second", "secs", "sec"],
+               }
 
-        if count == 0:
-            m = int(duration_str) if duration_str.isnumeric() else 0
-            duration = m * 60
-        elif count == 1:
-            m_str = duration_str.split(":")[0]
-            s_str = duration_str.split(":")[1]
-            m = int(m_str) if m_str.isnumeric() else 0
-            s = int(s_str) if s_str.isnumeric() else 0
-            duration = m * 60 + s
-        elif count == 2:
-            h_str = duration_str.split(":")[0]
-            m_str = duration_str.split(":")[1]
-            s_str = duration_str.split(":")[2]
-            h = int(h_str) if h_str.isnumeric() else 0
-            m = int(m_str) if m_str.isnumeric() else 0
-            s = int(s_str) if s_str.isnumeric() else 0
-            duration = h * 3600 + m * 60 + s
-        else:
-            duration = -1
+        rep = dict((re.escape(v), k) for k, x in rep.items() for v in x)
+        pattern = re.compile("|".join(rep.keys()))
+        duration_str = pattern.sub(lambda m: rep[re.escape(m.group(0))], duration_str)
 
-        return duration
+        print(duration_str)
+        midnight_plus_time = parser.parse(duration_str)
+        midnight: datetime = datetime.combine(datetime.today(), datetime.min.time())
+        timedelta = midnight_plus_time - midnight
+        return timedelta.seconds
 
     @staticmethod
     def __convert_secs_to_human_format(seconds):
-        m, s = divmod(seconds, 60)
-        h, m = divmod(m, 60)
+        duration_units = (
+            ('day', 60 * 60 * 24),
+            ('hour', 60 * 60),
+            ('minute', 60),
+            ('second', 1)
+        )
 
-        return ((str(h) + ' hr ' if h > 0 else '') +
-                (str(m) + ' min ' if m > 0 else '') +
-                (str(s) + ' sec ' if s > 0 else '')).strip()
+        if seconds == 0:
+            return '0 second'
+
+        parts = []
+        for unit, div in duration_units:
+            amount, seconds = divmod(int(seconds), div)
+            if amount > 0:
+                parts.append('{} {}{}'.format(amount, unit, "" if amount == 1 else "s"))
+        return ' '.join(parts)
