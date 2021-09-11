@@ -15,6 +15,9 @@ class IrpisMainHelper:
         on = True
         while True:
             self.logger.info("Calling IRPIS main")
+
             # self.display.toggle_display_on_off(on)
+            # sleep(5 if on else 30)
             # on = not on
+
             sleep(10)
