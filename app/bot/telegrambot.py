@@ -5,15 +5,17 @@ from app.bot.telegrambothelper import TelegramBotHelper
 
 
 class TelegramBot(TelegramBotHelper):
-    def __init__(self, config, logger, db=None, mqtt=None):
+    def __init__(self, config, logger, db=None):
         self._set_logger(logger)
         self._set_config(config)
         self._set_db(db)
-        self._set_mqtt(mqtt)
 
         defaults = Defaults(parse_mode=ParseMode.HTML)
         self.updater = Updater(token=config.get_telegram_api_key(), use_context=True, defaults=defaults)
         self.dp = self.updater.dispatcher
+
+    def set_mqtt(self, mqtt):
+        self._set_mqtt(mqtt)
 
         if mqtt:
             self._greet_message()

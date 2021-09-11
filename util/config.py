@@ -5,6 +5,12 @@ class Config:
     def __init__(self):
         self.config = dotenv_values('.env')
 
+    def get_application_name(self):
+        return self.config['APPLICATION_NAME'].upper()
+
+    def get_display_change_duration_sec(self):
+        return int(self.config['DISPLAY_CHANGE_DURATION_SEC'])
+
     def get_telegram_bot_name(self):
         return self.config['TELEGRAM_BOT_NAME']
 
