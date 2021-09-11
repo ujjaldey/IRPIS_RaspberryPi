@@ -11,6 +11,10 @@ class OledDisplayHelper:
     def _set_config(self, config):
         self.config = config
 
+    def _set_active(self, active, duration=0):
+        self.active = active
+        self.duration = duration
+
     # def __do_nothing(self, obj):
     #     pass
 
@@ -42,3 +46,6 @@ class OledDisplayHelper:
             self.device.show()
         else:
             self.device.hide()
+
+    def set_active(self, active, duration=0):
+        self._set_active(active, duration)

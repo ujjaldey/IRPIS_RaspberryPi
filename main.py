@@ -44,6 +44,7 @@ class Main:
         self.telegram_bot.start()
 
     def __start_display_main(self):
+        self.mqtt_broker.set_display(self.display)
         self.display.start()
 
     def __start_irpis_main(self):

@@ -39,17 +39,9 @@ class TelegramBotHelper:
             response_msg = 'Enter the duration!'
             success = False
         else:
-            # duration_str = context.args[0]
-            #
-            # if len(context.args) > 1:
-            #     duration_str = context.args[0] + context.args[1]
-
             try:
                 duration_str = " ".join(context.args)
-                print(duration_str)
-
                 duration = self.__convert_duration_to_secs(duration_str.lower())
-                print(duration)
 
                 if duration > 0:
                     response_msg = f'OK. Turning the irrigation on for {self.__convert_secs_to_human_format(duration)}...'
@@ -89,7 +81,6 @@ class TelegramBotHelper:
         pattern = re.compile("|".join(rep.keys()))
         duration_str = pattern.sub(lambda m: rep[re.escape(m.group(0))], duration_str)
 
-        print(duration_str)
         midnight_plus_time = parser.parse(duration_str)
         midnight: datetime = datetime.combine(datetime.today(), datetime.min.time())
         timedelta = midnight_plus_time - midnight

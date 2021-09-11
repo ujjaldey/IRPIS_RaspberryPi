@@ -9,6 +9,9 @@ class MqttBroker(MqttBrokerHelper):
 
         self.client = mqtt.Client()
 
+    def set_display(self, display):
+        self._set_display(display)
+
     def connect(self):
         mqtt_server = self.config.get_mqtt_server()
         mqtt_port = self.config.get_mqtt_port()

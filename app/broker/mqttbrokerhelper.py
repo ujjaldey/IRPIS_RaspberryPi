@@ -3,6 +3,8 @@ import json
 
 TYPE_COMMAND = 'COMMAND'
 TYPE_ALIVE = 'ALIVE'
+STATUS_ON = 'on'
+STATUS_OFF = 'off'
 
 
 class MqttBrokerHelper:
@@ -11,6 +13,9 @@ class MqttBrokerHelper:
 
     def _set_config(self, config):
         self.config = config
+
+    def _set_display(self, display):
+        self.display = display
 
     def _on_connect(self, mqtt_broker, client, userdata, rc):
         self.logger.info(f'Connected to MQTT broker with result code {str(rc)}')
@@ -32,8 +37,17 @@ class MqttBrokerHelper:
                 status_str = resp_status.lower()
                 message = f'Irrigation {success_str}turned {status_str}!'
 
+                # TODO. Modify the ESP code to return the duration as part of response. and parse it here
+                duration = 10
+
                 if not resp_success:
                     message += '\nError: ' + resp_message
+                else:
+                    print("-----------------", status_str)
+                    if status_str == STATUS_ON:
+                        self.display.set_active(True, duration)
+                    elif status_str == STATUS_OFF:
+                        self.display.set_active(False)
 
                 telegram_bot.send_response(message)
         else:
