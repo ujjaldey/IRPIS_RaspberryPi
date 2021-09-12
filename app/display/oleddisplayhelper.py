@@ -41,7 +41,7 @@ class OledDisplayHelper:
         x_value = (width - draw.textsize(text, font=font)[0]) / 2
         draw.text((x_value, y_value), text=text, font=font, fill=fill)
 
-    def toggle_display_on_off(self, on_off):
+    def enable_backlight(self, on_off):
         if on_off:
             self.device.show()
         else:

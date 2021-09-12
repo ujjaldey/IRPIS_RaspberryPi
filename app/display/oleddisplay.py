@@ -63,15 +63,17 @@ class OledDisplay(OledDisplayHelper):
     def start(self):
         pages = [OledDisplayPage.NOW, OledDisplayPage.NEXT_SCHEDULE, OledDisplayPage.LAST_RUN]
         counter = 0
-        counter_display_off = 0
+        current_sec = int(time.time())
         change_duration = self.config.get_display_change_duration_sec()
+        backlight_enabled = True
 
         while True:
             if self.active:
                 self.duration = self.duration - .5
                 self.__show_dashboard(OledDisplayPage.ACTIVE)
                 counter = 0
-                counter_display_off = 0
+                current_sec = int(time.time())
+                backlight_enabled = True
             else:
                 self.__show_dashboard(pages[math.floor(counter / change_duration)])
                 counter = counter + 1
@@ -79,12 +81,11 @@ class OledDisplay(OledDisplayHelper):
                 if counter >= 3 * change_duration:
                     counter = 0
 
-                counter_display_off = counter_display_off + 1
-                print(counter_display_off)
+                # print(datetime.now(), backlight_enabled, current_sec, int(time.time()),
+                #       current_sec + self.config.get_display_timeout_sec())
 
-                if counter_display_off >= 10 / .5:
-                    counter_display_off = 0
-                    # TODO rename the func name to display_backlight()
-                    self.toggle_display_on_off(False)
+                if backlight_enabled and int(time.time()) >= current_sec + self.config.get_display_timeout_sec():
+                    backlight_enabled = False
+                    self.enable_backlight(backlight_enabled)
 
             time.sleep(.5)

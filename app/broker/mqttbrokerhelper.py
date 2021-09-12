@@ -46,10 +46,10 @@ class MqttBrokerHelper:
                     print("-----------------", status_str)
                     if status_str == STATUS_ON:
                         self.display.set_active(True, duration)
-                        self.display.toggle_display_on_off(True)
+                        self.display.enable_backlight(True)
                     elif status_str == STATUS_OFF:
                         self.display.set_active(False)
-                        self.display.toggle_display_on_off(True)
+                        self.display.enable_backlight(True)
 
                 telegram_bot.send_response(message)
         else:
