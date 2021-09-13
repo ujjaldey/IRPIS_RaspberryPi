@@ -11,7 +11,8 @@ class TelegramBot(TelegramBotHelper):
         self._set_db(db)
 
         defaults = Defaults(parse_mode=ParseMode.HTML)
-        self.updater = Updater(token=config.get_telegram_api_key(), use_context=True, defaults=defaults)
+        self.updater = Updater(token=config.get_telegram_api_key(), use_context=True, defaults=defaults,
+                               request_kwargs={'read_timeout': 2, 'connect_timeout': 2})
         self.dp = self.updater.dispatcher
 
     def set_mqtt(self, mqtt):

@@ -16,10 +16,17 @@ class OledDisplay(OledDisplayHelper):
         self._set_logger(logger)
         self._set_config(config)
         self._set_active(False)
+        self._set_wifi_online(False)
+        self._esp8266_online = False
 
         self.device = self._initialize_display()
         self.active = False
+        self.wifi_online = False
         self.duration = 0
+
+    @staticmethod
+    def __show_wifi_status(draw):
+        draw.line((103, 3, 114, 10), fill="white")
 
     def __show_dashboard(self, display_page):
         font_banner = self._make_font(FONT_CONSOLAS, 12)
@@ -32,9 +39,14 @@ class OledDisplay(OledDisplayHelper):
 
         with canvas(self.device) as draw:
             draw.text((1, 1), text=self.config.get_application_name(), font=font_banner, fill="white")
-            draw.text((105, 1), text='\uf012', font=font_icon_1, fill="white")
-            draw.text((120, 1), text='\uf043', font=font_icon_2, fill="white")
+            draw.text((103, 1), text='\uf012', font=font_icon_1, fill="white")
+            draw.text((119, 1), text='\uf043', font=font_icon_2, fill="white")
             draw.line((0, 12, 128, 12), fill="white")
+
+            if not self.wifi_online:
+                self.__show_wifi_status(draw)
+
+            draw.line((116, 3, 127, 10), fill="white")
 
             if display_page == OledDisplayPage.ACTIVE:
                 draw.text((1, 14), text="Active:", font=font_row_1, fill="white")
@@ -81,8 +93,8 @@ class OledDisplay(OledDisplayHelper):
                 if counter >= 3 * change_duration:
                     counter = 0
 
-                # print(datetime.now(), backlight_enabled, current_sec, int(time.time()),
-                #       current_sec + self.config.get_display_timeout_sec())
+                print(datetime.now(), backlight_enabled, current_sec, int(time.time()),
+                      current_sec + self.config.get_display_timeout_sec())
 
                 if backlight_enabled and int(time.time()) >= current_sec + self.config.get_display_timeout_sec():
                     backlight_enabled = False

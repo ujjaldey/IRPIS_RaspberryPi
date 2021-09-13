@@ -27,7 +27,7 @@ class MqttBrokerHelper:
 
         telegram_bot = TelegramBot(self.config, self.logger)
 
-        resp_sender, resp_success, resp_type, resp_status, resp_message = \
+        resp_sender, resp_success, resp_type, resp_status, resp_duration, resp_message = \
             self.__parse_response(msg_str)
 
         if self.__validate_response(self.config.get_mqtt_response_topic(), self.config.get_mqtt_sender(), msg.topic,
@@ -37,8 +37,7 @@ class MqttBrokerHelper:
                 status_str = resp_status.lower()
                 message = f'Irrigation {success_str}turned {status_str}!'
 
-                # TODO. Modify the ESP code to return the duration as part of response. and parse it here
-                duration = 10
+                duration = int(resp_duration)
 
                 if not resp_success:
                     message += '\nError: ' + resp_message
@@ -63,11 +62,12 @@ class MqttBrokerHelper:
         resp_success_str = data.get('success') if (data.get('success') is not None) else ''
         resp_type = data.get('type') if (data.get('type') is not None) else ''
         resp_status = data.get('status') if (data.get('status') is not None) else ''
+        resp_duration = data.get('duration') if (data.get('duration') is not None) else ''
         resp_message = data.get('message') if (data.get('message') is not None) else ''
 
         resp_success = resp_success_str == 'true'
 
-        return resp_sender, resp_success, resp_type, resp_status, resp_message
+        return resp_sender, resp_success, resp_type, resp_status, resp_duration, resp_message
 
     @staticmethod
     def __validate_response(mqtt_topic, mqtt_sender, topic, type, sender):
