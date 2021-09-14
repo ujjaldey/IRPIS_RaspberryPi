@@ -9,6 +9,7 @@ from app.display.oleddisplaypage import OledDisplayPage
 
 FONT_CONSOLAS = 'Consolas.ttf'
 FONT_FONTAWESOME = 'fontawesome-webfont.ttf'
+ESP8266_STATUS_CHECK_TIMEOUT_SEC = 10
 
 
 class OledDisplay(OledDisplayHelper):
@@ -17,16 +18,31 @@ class OledDisplay(OledDisplayHelper):
         self._set_config(config)
         self._set_active(False)
         self._set_wifi_online(False)
-        self._esp8266_online = False
+        self._set_esp8266_online(False)
+        self.esp8266_status_check_sec = int(time.time())
 
         self.device = self._initialize_display()
         self.active = False
         self.wifi_online = False
+        self.esp8266_online = False
         self.duration = 0
+
+    def set_wifi_online(self, online):
+        self._set_wifi_online(online)
+
+    def set_esp8266_online(self, online):
+        if online:
+            self.esp8266_status_check_sec = int(time.time())
+
+        self._set_esp8266_online(online)
 
     @staticmethod
     def __show_wifi_status(draw):
         draw.line((103, 3, 114, 10), fill="white")
+
+    @staticmethod
+    def __show_esp8266_status(draw):
+        draw.line((116, 3, 127, 10), fill="white")
 
     def __show_dashboard(self, display_page):
         font_banner = self._make_font(FONT_CONSOLAS, 12)
@@ -46,7 +62,8 @@ class OledDisplay(OledDisplayHelper):
             if not self.wifi_online:
                 self.__show_wifi_status(draw)
 
-            draw.line((116, 3, 127, 10), fill="white")
+            if not self.esp8266_online:
+                self.__show_esp8266_status(draw)
 
             if display_page == OledDisplayPage.ACTIVE:
                 draw.text((1, 14), text="Active:", font=font_row_1, fill="white")
@@ -75,7 +92,8 @@ class OledDisplay(OledDisplayHelper):
     def start(self):
         pages = [OledDisplayPage.NOW, OledDisplayPage.NEXT_SCHEDULE, OledDisplayPage.LAST_RUN]
         counter = 0
-        current_sec = int(time.time())
+        display_off_counter_sec = int(time.time())
+        self.esp8266_status_check_sec = int(time.time())
         change_duration = self.config.get_display_change_duration_sec()
         backlight_enabled = True
 
@@ -84,7 +102,7 @@ class OledDisplay(OledDisplayHelper):
                 self.duration = self.duration - .5
                 self.__show_dashboard(OledDisplayPage.ACTIVE)
                 counter = 0
-                current_sec = int(time.time())
+                display_off_counter_sec = int(time.time())
                 backlight_enabled = True
             else:
                 self.__show_dashboard(pages[math.floor(counter / change_duration)])
@@ -93,11 +111,13 @@ class OledDisplay(OledDisplayHelper):
                 if counter >= 3 * change_duration:
                     counter = 0
 
-                print(datetime.now(), backlight_enabled, current_sec, int(time.time()),
-                      current_sec + self.config.get_display_timeout_sec())
-
-                if backlight_enabled and int(time.time()) >= current_sec + self.config.get_display_timeout_sec():
+                if backlight_enabled and int(
+                        time.time()) >= display_off_counter_sec + self.config.get_display_timeout_sec():
                     backlight_enabled = False
                     self.enable_backlight(backlight_enabled)
+
+            if int(time.time()) >= self.esp8266_status_check_sec + ESP8266_STATUS_CHECK_TIMEOUT_SEC:
+                self._set_esp8266_online(False)
+                self.esp8266_status_check_sec = int(time.time())
 
             time.sleep(.5)

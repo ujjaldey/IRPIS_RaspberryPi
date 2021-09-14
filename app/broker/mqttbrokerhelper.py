@@ -42,7 +42,6 @@ class MqttBrokerHelper:
                 if not resp_success:
                     message += '\nError: ' + resp_message
                 else:
-                    print("-----------------", status_str)
                     if status_str == STATUS_ON:
                         self.display.set_active(True, duration)
                         self.display.enable_backlight(True)
@@ -51,6 +50,8 @@ class MqttBrokerHelper:
                         self.display.enable_backlight(True)
 
                 telegram_bot.send_response(message)
+            elif resp_type == TYPE_ALIVE:
+                self.display.set_esp8266_online(True)
         else:
             message = 'Invalid response'
             telegram_bot.send_response(message)

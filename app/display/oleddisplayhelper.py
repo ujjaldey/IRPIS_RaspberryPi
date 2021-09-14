@@ -18,8 +18,8 @@ class OledDisplayHelper:
     def _set_wifi_online(self, online):
         self.wifi_online = online
 
-    def set_wifi_online(self, online):
-        self._set_wifi_online(online)
+    def _set_esp8266_online(self, online):
+        self.esp8266_online = online
 
     # def __do_nothing(self, obj):
     #     pass

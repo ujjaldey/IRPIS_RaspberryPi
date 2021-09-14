@@ -24,6 +24,7 @@ class IrpisMainHelper:
         on = True
         while True:
             self.logger.info("Calling IRPIS main")
+            # TODO should be checked at certain interval only
             self.display.set_wifi_online(self.__is_internet_connected())
 
             # self.display.enable_backlight(on)
