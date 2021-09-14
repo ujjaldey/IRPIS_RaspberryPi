@@ -26,6 +26,7 @@ class OledDisplay(OledDisplayHelper):
         self.wifi_online = False
         self.esp8266_online = False
         self.duration = 0
+        self.active_end_sec = 0
 
     def set_wifi_online(self, online):
         self._set_wifi_online(online)
@@ -67,8 +68,8 @@ class OledDisplay(OledDisplayHelper):
 
             if display_page == OledDisplayPage.ACTIVE:
                 draw.text((1, 14), text="Active:", font=font_row_1, fill="white")
-                self._center_text(draw, 128, 26, text=str(math.floor(self.duration)) + " sec", font=font_row_2,
-                                  fill="white")
+                self._center_text(draw, 128, 26, text=str(self.active_end_sec - int(time.time())) + " sec",
+                                  font=font_row_2, fill="white")
                 self._center_text(draw, 128, 41, text="remaining", font=font_row_3,
                                   fill="white")
                 self._center_text(draw, 128, 53, text="(watering)", font=font_row_4, fill="white")

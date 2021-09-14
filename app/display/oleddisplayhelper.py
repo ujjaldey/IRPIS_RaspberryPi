@@ -1,3 +1,4 @@
+import time
 from pathlib import Path
 
 from PIL import ImageFont
@@ -14,6 +15,7 @@ class OledDisplayHelper:
     def _set_active(self, active, duration=0):
         self.active = active
         self.duration = duration
+        self.active_end_sec = int(time.time()) + self.duration
 
     def _set_wifi_online(self, online):
         self.wifi_online = online
