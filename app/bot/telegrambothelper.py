@@ -31,7 +31,8 @@ class TelegramBotHelper:
                 duration = self.__convert_duration_to_secs(duration_str.lower())
 
                 if duration > 0:
-                    response_msg = f'OK. Turning the irrigation on for {self.__convert_secs_to_human_format(duration)}...'
+                    response_msg = \
+                        f'OK. Turning the irrigation on for {self.util.convert_secs_to_human_format(duration)}...'
                     success = True
                 else:
                     response_msg = 'Invalid duration!'

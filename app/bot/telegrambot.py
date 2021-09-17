@@ -2,6 +2,7 @@ from telegram import ParseMode
 from telegram.ext import Defaults, Updater, CommandHandler
 
 from app.bot.telegrambothelper import TelegramBotHelper
+from app.common.utils import Util
 
 
 class TelegramBot(TelegramBotHelper):
@@ -10,6 +11,7 @@ class TelegramBot(TelegramBotHelper):
         self.config = config
         self.mqtt_client = None
         # self.conn = db.connect()
+        self.util = Util()
 
         defaults = Defaults(parse_mode=ParseMode.HTML)
         self.updater = Updater(token=config.get_telegram_api_key(), use_context=True, defaults=defaults,

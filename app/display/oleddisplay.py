@@ -1,6 +1,7 @@
 import math
 import time
 
+from app.common.utils import Util
 from app.display.oleddisplayenum import OledDisplayEnum
 from app.display.oleddisplayhelper import OledDisplayHelper
 
@@ -24,6 +25,8 @@ class OledDisplay(OledDisplayHelper):
         self.esp8266_online = False
         self.duration = 0
         self.active_end_sec = 0
+
+        self.util = Util()
 
     def set_wifi_online(self, online):
         self.wifi_online = online

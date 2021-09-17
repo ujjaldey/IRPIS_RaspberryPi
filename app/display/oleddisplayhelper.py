@@ -79,7 +79,9 @@ class OledDisplayHelper:
 
                 if display_page == OledDisplayEnum.ACTIVE:
                     draw.text((1, 14), text="Active:", font=font_row_1, fill="white")
-                    self._center_text(draw, 128, 26, text=str(self.active_end_sec - int(time.time())) + " sec",
+                    self._center_text(draw, 128, 26,
+                                      text=self.util.convert_secs_to_human_format(
+                                          self.active_end_sec - int(time.time()), True),
                                       font=font_row_2, fill="white")
                     self._center_text(draw, 128, 41, text="remaining", font=font_row_3,
                                       fill="white")
