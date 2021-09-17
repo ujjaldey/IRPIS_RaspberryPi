@@ -5,10 +5,10 @@ from app.bot.telegrambothelper import TelegramBotHelper
 
 
 class TelegramBot(TelegramBotHelper):
-    def __init__(self, config, logger, db=None):
-        self._set_logger(logger)
-        self._set_config(config)
-        self._set_db(db)
+    def __init__(self, config, logger):
+        self.logger = logger
+        self.config = config
+        # self.conn = db.connect()
 
         defaults = Defaults(parse_mode=ParseMode.HTML)
         self.updater = Updater(token=config.get_telegram_api_key(), use_context=True, defaults=defaults,
@@ -22,7 +22,7 @@ class TelegramBot(TelegramBotHelper):
             self._greet_message()
 
     def add_handlers(self):
-        self.dp.add_handler(CommandHandler('status', self._status))
+        # self.dp.add_handler(CommandHandler('status', self._status))
         self.dp.add_handler(CommandHandler('on', self._on))
         self.dp.add_handler(CommandHandler('off', self._off))
 

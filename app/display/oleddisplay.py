@@ -5,7 +5,7 @@ from datetime import datetime
 from luma.core.render import canvas
 
 from app.display.oleddisplayhelper import OledDisplayHelper
-from app.display.oleddisplaypage import OledDisplayPage
+from app.display.oleddisplayenum import OledDisplayEnum
 
 FONT_CONSOLAS = 'Consolas.ttf'
 FONT_FONTAWESOME = 'fontawesome-webfont.ttf'
@@ -14,11 +14,13 @@ ESP8266_STATUS_CHECK_TIMEOUT_SEC = 10
 
 class OledDisplay(OledDisplayHelper):
     def __init__(self, config, logger):
-        self._set_logger(logger)
-        self._set_config(config)
+        self.logger = logger
+        self.config = config
+
+        self.wifi_online = False
+        self.esp8266_online = False
+
         self._set_active(False)
-        self._set_wifi_online(False)
-        self._set_esp8266_online(False)
         self.esp8266_status_check_sec = int(time.time())
 
         self.device = self._initialize_display()
@@ -29,13 +31,13 @@ class OledDisplay(OledDisplayHelper):
         self.active_end_sec = 0
 
     def set_wifi_online(self, online):
-        self._set_wifi_online(online)
+        self.wifi_online = online
 
     def set_esp8266_online(self, online):
         if online:
             self.esp8266_status_check_sec = int(time.time())
 
-        self._set_esp8266_online(online)
+        self.esp8266_online = online
 
     def cleanup(self):
         self._cleanup()
@@ -69,32 +71,32 @@ class OledDisplay(OledDisplayHelper):
             if not self.esp8266_online:
                 self.__show_esp8266_status(draw)
 
-            if display_page == OledDisplayPage.ACTIVE:
+            if display_page == OledDisplayEnum.ACTIVE:
                 draw.text((1, 14), text="Active:", font=font_row_1, fill="white")
                 self._center_text(draw, 128, 26, text=str(self.active_end_sec - int(time.time())) + " sec",
                                   font=font_row_2, fill="white")
                 self._center_text(draw, 128, 41, text="remaining", font=font_row_3,
                                   fill="white")
                 self._center_text(draw, 128, 53, text="(watering)", font=font_row_4, fill="white")
-            elif display_page == OledDisplayPage.NOW:
+            elif display_page == OledDisplayEnum.NOW:
                 now = datetime.now()
                 draw.text((1, 14), text="Now:", font=font_row_1, fill="white")
                 self._center_text(draw, 128, 26, text=now.strftime("%H:%M"), font=font_row_2, fill="white")
                 self._center_text(draw, 128, 41, text=now.strftime("%d-%m-%Y"), font=font_row_3, fill="white")
                 self._center_text(draw, 128, 53, text=now.strftime("(%A)"), font=font_row_4, fill="white")
-            elif display_page == OledDisplayPage.NEXT_SCHEDULE:
+            elif display_page == OledDisplayEnum.NEXT_SCHEDULE:
                 draw.text((1, 14), text="Next Schedule:", font=font_row_1, fill="white")
                 self._center_text(draw, 128, 26, text="21:30", font=font_row_2, fill="white")
                 self._center_text(draw, 128, 41, text="In 2 days", font=font_row_3, fill="white")
                 self._center_text(draw, 128, 53, text="4 mins", font=font_row_4, fill="white")
-            elif display_page == OledDisplayPage.LAST_RUN:
+            elif display_page == OledDisplayEnum.LAST_RUN:
                 draw.text((1, 14), text="Last Run:", font=font_row_1, fill="white")
                 self._center_text(draw, 128, 26, text="08:30", font=font_row_2, fill="white")
                 self._center_text(draw, 128, 41, text="Yesterday", font=font_row_3, fill="white")
                 self._center_text(draw, 128, 53, text="1 hr 1 min 20 secs (A)", font=font_row_4, fill="white")
 
     def start(self):
-        pages = [OledDisplayPage.NOW, OledDisplayPage.NEXT_SCHEDULE, OledDisplayPage.LAST_RUN]
+        pages = [OledDisplayEnum.NOW, OledDisplayEnum.NEXT_SCHEDULE, OledDisplayEnum.LAST_RUN]
         counter = 0
         display_off_counter_sec = int(time.time())
         self.esp8266_status_check_sec = int(time.time())
@@ -104,7 +106,7 @@ class OledDisplay(OledDisplayHelper):
         while True:
             if self.active:
                 self.duration = self.duration - .5
-                self.__show_dashboard(OledDisplayPage.ACTIVE)
+                self.__show_dashboard(OledDisplayEnum.ACTIVE)
                 counter = 0
                 display_off_counter_sec = int(time.time())
                 backlight_enabled = True
@@ -121,7 +123,7 @@ class OledDisplay(OledDisplayHelper):
                     self.enable_backlight(backlight_enabled)
 
             if int(time.time()) >= self.esp8266_status_check_sec + ESP8266_STATUS_CHECK_TIMEOUT_SEC:
-                self._set_esp8266_online(False)
+                self.esp8266_online = False
                 self.esp8266_status_check_sec = int(time.time())
 
             time.sleep(.5)

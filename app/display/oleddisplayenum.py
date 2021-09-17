@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class OledDisplayPage(Enum):
+class OledDisplayEnum(Enum):
     BANNER = 1
     NOW = 2
     NEXT_SCHEDULE = 3

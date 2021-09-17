@@ -6,22 +6,10 @@ from luma.core import cmdline, error
 
 
 class OledDisplayHelper:
-    def _set_logger(self, logger):
-        self.logger = logger
-
-    def _set_config(self, config):
-        self.config = config
-
     def _set_active(self, active, duration=0):
         self.active = active
         self.duration = duration
         self.active_end_sec = int(time.time()) + self.duration
-
-    def _set_wifi_online(self, online):
-        self.wifi_online = online
-
-    def _set_esp8266_online(self, online):
-        self.esp8266_online = online
 
     # def __do_nothing(self, obj):
     #     pass

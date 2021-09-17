@@ -1,5 +1,6 @@
-from app.bot.telegrambot import TelegramBot
 import json
+
+from app.bot.telegrambot import TelegramBot
 
 TYPE_COMMAND = 'COMMAND'
 TYPE_ALIVE = 'ALIVE'
@@ -7,18 +8,10 @@ STATUS_ON = 'on'
 STATUS_OFF = 'off'
 
 
-class MqttBrokerHelper:
-    def _set_logger(self, logger):
-        self.logger = logger
-
-    def _set_config(self, config):
-        self.config = config
-
-    def _set_display(self, display):
-        self.display = display
-
+class MqttClientHelper:
     def _on_connect(self, mqtt_broker, client, userdata, rc):
         self.logger.info(f'Connected to MQTT broker with result code {str(rc)}')
+        self._is_connected = (rc == 0)
         mqtt_broker.subscribe(self.config.get_mqtt_response_topic())
 
     def _on_message(self, client, userdata, msg):
