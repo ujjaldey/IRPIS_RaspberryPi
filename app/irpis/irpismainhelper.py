@@ -17,7 +17,6 @@ class IrpisMainHelper:
         while True:
             self.logger.info("Calling IRPIS main")
             # TODO should be checked at certain interval only
-            # print(self.__is_internet_connected())
             self.display.set_wifi_online(self.__is_internet_connected())
 
             # self.display.enable_backlight(on)
@@ -26,8 +25,7 @@ class IrpisMainHelper:
 
             if counter >= 20:
                 duration = 5
-                self.mqtt.publish(self.config.get_mqtt_command_topic(),
-                                  f'{{\"sender\": \"IRPIS-RPI\", \"action\": \"ON\", \"duration\": {duration}}}')
+                self.mqtt_client.turn_on_payload(duration)
                 counter = 0
 
             counter += 1

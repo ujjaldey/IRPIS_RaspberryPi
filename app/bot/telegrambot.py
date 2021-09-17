@@ -8,6 +8,7 @@ class TelegramBot(TelegramBotHelper):
     def __init__(self, config, logger):
         self.logger = logger
         self.config = config
+        self.mqtt_client = None
         # self.conn = db.connect()
 
         defaults = Defaults(parse_mode=ParseMode.HTML)
@@ -15,10 +16,10 @@ class TelegramBot(TelegramBotHelper):
                                request_kwargs={'read_timeout': 2, 'connect_timeout': 2})
         self.dp = self.updater.dispatcher
 
-    def set_mqtt(self, mqtt):
-        self._set_mqtt(mqtt)
+    def set_mqtt_client(self, mqtt_client):
+        self.mqtt_client = mqtt_client
 
-        if mqtt:
+        if mqtt_client:
             self._greet_message()
 
     def add_handlers(self):

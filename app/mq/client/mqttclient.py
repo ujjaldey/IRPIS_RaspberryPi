@@ -1,5 +1,3 @@
-import json
-
 from app.mq.broker.mqttbroker import MqttBroker
 from app.mq.client.mqttclienthelper import MqttClientHelper
 
@@ -10,18 +8,17 @@ class MqttClient(MqttClientHelper):
         self.config = config
 
         self.mqtt_broker = MqttBroker(config, logger)
+        self.mqtt_client = None
         self._is_connected = False
         self.display = None
 
     def connect(self):
-        mqtt_client = self.mqtt_broker.connect()
+        self.mqtt_client = self.mqtt_broker.connect()
 
-        mqtt_client.on_connect = self._on_connect
-        mqtt_client.on_message = self._on_message
+        self.mqtt_client.on_connect = self._on_connect
+        self.mqtt_client.on_message = self._on_message
 
-        mqtt_client.loop_start()
-
-        return mqtt_client
+        self.mqtt_client.loop_start()
 
     def set_display(self, display):
         self.display = display

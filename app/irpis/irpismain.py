@@ -6,13 +6,13 @@ class IrpisMain(IrpisMainHelper):
         self.logger = logger
         self.config = config
         self.display = None
-        self.mqtt = None
+        self.mqtt_client = None
 
     def set_display(self, display):
         self.display = display
 
-    def set_mqtt(self, mqtt):
-        self.mqtt = mqtt
+    def set_mqtt_client(self, mqtt_client):
+        self.mqtt_client = mqtt_client
 
     def start(self):
         self._main()

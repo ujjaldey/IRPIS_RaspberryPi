@@ -7,9 +7,6 @@ from telegram.ext import CallbackContext
 
 
 class TelegramBotHelper:
-    def _set_mqtt(self, mqtt):
-        self.mqtt = mqtt
-
     def _greet_message(self):
         self.updater.bot.send_message(chat_id=self.config.get_telegram_chat_id(),
                                       text='<b><i>IOT Remote Plant Irrigation System (IRPIS)</i></b> initiating...')
@@ -46,8 +43,7 @@ class TelegramBotHelper:
         context.bot.send_message(chat_id=self.config.get_telegram_chat_id(), text=response_msg)
 
         if success:
-            self.mqtt.publish(self.config.get_mqtt_command_topic(),
-                              f'{{\"sender\": \"IRPIS-RPI\", \"action\": \"ON\", \"duration\": {duration}}}')
+            self.mqtt_client.turn_on_payload(duration)
 
     def _off(self, update: Update, context: CallbackContext):
         self.logger.info('_off is called')
@@ -55,7 +51,7 @@ class TelegramBotHelper:
         response_msg = 'OK. Turning the irrigation off...'
         context.bot.send_message(chat_id=self.config.get_telegram_chat_id(), text=response_msg)
 
-        self.mqtt.publish(self.config.get_mqtt_command_topic(), '{\"sender\": \"IRPIS-RPI\", \"action\": \"OFF\"}')
+        self.mqtt_client.turn_off_payload()
 
     def _send_response(self, message):
         self.updater.bot.send_message(chat_id=self.config.get_telegram_chat_id(), text=message)

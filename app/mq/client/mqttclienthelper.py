@@ -49,6 +49,14 @@ class MqttClientHelper:
             message = 'Invalid response'
             telegram_bot.send_response(message)
 
+    def turn_on_payload(self, duration):
+        self.mqtt_client.publish(self.config.get_mqtt_command_topic(),
+                                 f'{{\"sender\": \"IRPIS-RPI\", \"action\": \"ON\", \"duration\": {duration}}}')
+
+    def turn_off_payload(self):
+        self.mqtt_client.publish(self.config.get_mqtt_command_topic(),
+                                 '{\"sender\": \"IRPIS-RPI\", \"action\": \"OFF\"}')
+
     @staticmethod
     def __parse_response(response):
         data = json.loads(response)

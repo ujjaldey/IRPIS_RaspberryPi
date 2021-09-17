@@ -42,8 +42,8 @@ class Main:
         self.logger.info('Creating new thread for MQTT & TelegramBot')
 
         try:
-            self.mqtt = self.mqtt_client.connect()
-            self.telegram_bot.set_mqtt(self.mqtt)
+            self.mqtt_client.connect()
+            self.telegram_bot.set_mqtt_client(self.mqtt_client)
             self.telegram_bot.start()
         except Exception as ex:
             self.logger.fatal("Exception in __start_mqtt_telegrambot: " + str(ex), exc_info=True)
@@ -68,7 +68,7 @@ class Main:
 
             self.logger.info('MQTT is not connected')
             self.irpis.set_display(self.display)
-            self.irpis.set_mqtt(self.mqtt)
+            self.irpis.set_mqtt_client(self.mqtt_client)
             self.irpis.start()
         except Exception as ex:
             self.logger.fatal("Exception in __start_irpis_main: " + str(ex), exc_info=True)
