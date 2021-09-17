@@ -59,41 +59,44 @@ class OledDisplay(OledDisplayHelper):
         font_row_3 = self._make_font(FONT_CONSOLAS, 12)
         font_row_4 = self._make_font(FONT_CONSOLAS, 10)
 
-        with canvas(self.device) as draw:
-            draw.text((1, 1), text=self.config.get_application_name(), font=font_banner, fill="white")
-            draw.text((103, 1), text='\uf012', font=font_icon_1, fill="white")
-            draw.text((119, 1), text='\uf043', font=font_icon_2, fill="white")
-            draw.line((0, 12, 128, 12), fill="white")
+        try:
+            with canvas(self.device) as draw:
+                draw.text((1, 1), text=self.config.get_application_name(), font=font_banner, fill="white")
+                draw.text((103, 1), text='\uf012', font=font_icon_1, fill="white")
+                draw.text((119, 1), text='\uf043', font=font_icon_2, fill="white")
+                draw.line((0, 12, 128, 12), fill="white")
 
-            if not self.wifi_online:
-                self.__show_wifi_status(draw)
+                if not self.wifi_online:
+                    self.__show_wifi_status(draw)
 
-            if not self.esp8266_online:
-                self.__show_esp8266_status(draw)
+                if not self.esp8266_online:
+                    self.__show_esp8266_status(draw)
 
-            if display_page == OledDisplayEnum.ACTIVE:
-                draw.text((1, 14), text="Active:", font=font_row_1, fill="white")
-                self._center_text(draw, 128, 26, text=str(self.active_end_sec - int(time.time())) + " sec",
-                                  font=font_row_2, fill="white")
-                self._center_text(draw, 128, 41, text="remaining", font=font_row_3,
-                                  fill="white")
-                self._center_text(draw, 128, 53, text="(watering)", font=font_row_4, fill="white")
-            elif display_page == OledDisplayEnum.NOW:
-                now = datetime.now()
-                draw.text((1, 14), text="Now:", font=font_row_1, fill="white")
-                self._center_text(draw, 128, 26, text=now.strftime("%H:%M"), font=font_row_2, fill="white")
-                self._center_text(draw, 128, 41, text=now.strftime("%d-%m-%Y"), font=font_row_3, fill="white")
-                self._center_text(draw, 128, 53, text=now.strftime("(%A)"), font=font_row_4, fill="white")
-            elif display_page == OledDisplayEnum.NEXT_SCHEDULE:
-                draw.text((1, 14), text="Next Schedule:", font=font_row_1, fill="white")
-                self._center_text(draw, 128, 26, text="21:30", font=font_row_2, fill="white")
-                self._center_text(draw, 128, 41, text="In 2 days", font=font_row_3, fill="white")
-                self._center_text(draw, 128, 53, text="4 mins", font=font_row_4, fill="white")
-            elif display_page == OledDisplayEnum.LAST_RUN:
-                draw.text((1, 14), text="Last Run:", font=font_row_1, fill="white")
-                self._center_text(draw, 128, 26, text="08:30", font=font_row_2, fill="white")
-                self._center_text(draw, 128, 41, text="Yesterday", font=font_row_3, fill="white")
-                self._center_text(draw, 128, 53, text="1 hr 1 min 20 secs (A)", font=font_row_4, fill="white")
+                if display_page == OledDisplayEnum.ACTIVE:
+                    draw.text((1, 14), text="Active:", font=font_row_1, fill="white")
+                    self._center_text(draw, 128, 26, text=str(self.active_end_sec - int(time.time())) + " sec",
+                                      font=font_row_2, fill="white")
+                    self._center_text(draw, 128, 41, text="remaining", font=font_row_3,
+                                      fill="white")
+                    self._center_text(draw, 128, 53, text="(watering)", font=font_row_4, fill="white")
+                elif display_page == OledDisplayEnum.NOW:
+                    now = datetime.now()
+                    draw.text((1, 14), text="Now:", font=font_row_1, fill="white")
+                    self._center_text(draw, 128, 26, text=now.strftime("%H:%M"), font=font_row_2, fill="white")
+                    self._center_text(draw, 128, 41, text=now.strftime("%d-%m-%Y"), font=font_row_3, fill="white")
+                    self._center_text(draw, 128, 53, text=now.strftime("(%A)"), font=font_row_4, fill="white")
+                elif display_page == OledDisplayEnum.NEXT_SCHEDULE:
+                    draw.text((1, 14), text="Next Schedule:", font=font_row_1, fill="white")
+                    self._center_text(draw, 128, 26, text="21:30", font=font_row_2, fill="white")
+                    self._center_text(draw, 128, 41, text="In 2 days", font=font_row_3, fill="white")
+                    self._center_text(draw, 128, 53, text="4 mins", font=font_row_4, fill="white")
+                elif display_page == OledDisplayEnum.LAST_RUN:
+                    draw.text((1, 14), text="Last Run:", font=font_row_1, fill="white")
+                    self._center_text(draw, 128, 26, text="08:30", font=font_row_2, fill="white")
+                    self._center_text(draw, 128, 41, text="Yesterday", font=font_row_3, fill="white")
+                    self._center_text(draw, 128, 53, text="1 hr 1 min 20 secs (A)", font=font_row_4, fill="white")
+        except Exception:
+            pass
 
     def start(self):
         pages = [OledDisplayEnum.NOW, OledDisplayEnum.NEXT_SCHEDULE, OledDisplayEnum.LAST_RUN]

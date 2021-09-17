@@ -23,19 +23,19 @@ class Main:
         self.display = OledDisplay(self.config, self.logger)
         self.irpis = IrpisMain(self.config, self.logger)
 
+        self.thread_fns = [self.__start_mqtt_telegrambot, self.__start_display_main, self.__start_irpis_main]
+        self.threads = []
+
     def start(self):
         self.logger.info('Starting IRPIS_RaspberryPi')
 
-        thread_fns = [self.__start_mqtt_telegrambot, self.__start_display_main, self.__start_irpis_main]
-        threads = []
-
-        for tfn in thread_fns:
-            thread = Thread(target=tfn)
+        for thread_fn in self.thread_fns:
+            thread = Thread(target=thread_fn)
             thread.start()
-            threads.append(thread)
+            self.threads.append(thread)
 
-        for t in threads:
-            t.join()
+        for thread in self.threads:
+            thread.join()
 
     # TODO split this in separate functions and threads
     def __start_mqtt_telegrambot(self):
@@ -82,5 +82,5 @@ if __name__ == '__main__':
     try:
         main = Main()
         main.start()
-    except KeyboardInterrupt:
+    except (KeyboardInterrupt, SystemExit):
         main.terminate()
