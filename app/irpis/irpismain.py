@@ -1,3 +1,5 @@
+from time import sleep
+
 from app.irpis.irpismainhelper import IrpisMainHelper
 
 
@@ -15,4 +17,16 @@ class IrpisMain(IrpisMainHelper):
         self.mqtt_client = mqtt_client
 
     def start(self):
-        self._main()
+        counter = 0
+        while True:
+            self.logger.info("Calling IRPIS main")
+            # TODO should be checked at certain interval only
+            self.display.set_wifi_online(self._is_internet_connected())
+
+            if counter >= 20:
+                duration = 5
+                self.mqtt_client.turn_on_payload(duration)
+                counter = 0
+
+            counter += 1
+            sleep(1)
