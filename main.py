@@ -39,17 +39,33 @@ class Main:
     def __start_mqtt_telegrambot(self):
         self.logger.info('Creating new thread for MQTT & TelegramBot')
 
-        self.mqtt = self.mqtt_broker.connect()
-        self.telegram_bot.set_mqtt(self.mqtt)
-        self.telegram_bot.start()
+        try:
+            self.mqtt = self.mqtt_broker.connect()
+            self.telegram_bot.set_mqtt(self.mqtt)
+            self.telegram_bot.start()
+        except Exception as ex:
+            pass
 
     def __start_display_main(self):
-        self.mqtt_broker.set_display(self.display)
-        self.display.start()
+        self.logger.info('Creating new thread for Display')
+
+        try:
+            self.mqtt_broker.set_display(self.display)
+            self.display.start()
+        except Exception as ex:
+            pass
 
     def __start_irpis_main(self):
-        self.irpis.set_display(self.display)
-        self.irpis.start()
+        self.logger.info('Creating new thread for IRPIS Main')
+
+        try:
+            self.irpis.set_display(self.display)
+            self.irpis.start()
+        except Exception as ex:
+            pass
+
+    def terminate(self):
+        self.display.cleanup()
 
 
 if __name__ == '__main__':
@@ -57,4 +73,5 @@ if __name__ == '__main__':
         main = Main()
         main.start()
     except KeyboardInterrupt:
-        pass
+        print("terminated")
+        main.terminate()

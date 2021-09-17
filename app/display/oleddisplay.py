@@ -37,6 +37,9 @@ class OledDisplay(OledDisplayHelper):
 
         self._set_esp8266_online(online)
 
+    def cleanup(self):
+        self._cleanup()
+
     @staticmethod
     def __show_wifi_status(draw):
         draw.line((103, 3, 114, 10), fill="white")

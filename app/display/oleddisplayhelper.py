@@ -39,6 +39,9 @@ class OledDisplayHelper:
             self.logger.error('Error in initializing display: ' + str(e))
             return None
 
+    def _cleanup(self):
+        self.device.cleanup()
+
     @staticmethod
     def _make_font(name, size):
         font_path = str(Path(__file__).resolve().parent.parent.parent.joinpath('resources', 'fonts', name))
