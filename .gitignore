@@ -49,3 +49,5 @@ Thumbs.db
 *.wmv
 
 .env
+
+datafile/irpis_db_data.db

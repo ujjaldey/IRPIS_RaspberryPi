@@ -1,12 +1,18 @@
+import datetime
 from time import sleep
 
+from app.dao.schedule_dao import ScheduleDao
 from app.irpis.irpismainhelper import IrpisMainHelper
+from app.model.schedule import Schedule
 
 
 class IrpisMain(IrpisMainHelper):
-    def __init__(self, config, logger):
+    def __init__(self, logger, config, db):
         self.logger = logger
         self.config = config
+        self.db = db
+        self.conn = db.connect().execution_options(autocommit=True)
+
         self.display = None
         self.mqtt_client = None
 
@@ -17,16 +23,23 @@ class IrpisMain(IrpisMainHelper):
         self.mqtt_client = mqtt_client
 
     def start(self):
-        counter = 0
         while True:
             self.logger.info("Calling IRPIS main")
             # TODO should be checked at certain interval only
             self.display.set_wifi_online(self._is_internet_connected())
 
-            if counter >= 20:
-                duration = 5
-                self.mqtt_client.turn_on_payload(duration)
-                counter = 0
+            schedule_dao = ScheduleDao()
+            schedule = schedule_dao.select(self.conn)
 
-            counter += 1
+            next_schedule, duration = (schedule.next_schedule, schedule.duration) if schedule else (None, 0)
+
+            if datetime.datetime.now() >= next_schedule:
+                self.mqtt_client.turn_on_payload(duration)
+                schedule = Schedule(
+                    next_schedule=datetime.datetime.now().replace(microsecond=0) + datetime.timedelta(minutes=1),
+                    duration=15, created_at=datetime.datetime.now().replace(microsecond=0),
+                    updated_at=datetime.datetime.now().replace(microsecond=0))
+                success = schedule_dao.upsert(self.conn, schedule)
+                print('upsert', success)
+
             sleep(1)

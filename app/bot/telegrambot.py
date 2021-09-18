@@ -6,7 +6,7 @@ from app.util.common import Util
 
 
 class TelegramBot(TelegramBotHelper):
-    def __init__(self, config, logger):
+    def __init__(self, logger, config):
         self.logger = logger
         self.config = config
         self.mqtt_client = None

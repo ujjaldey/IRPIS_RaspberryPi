@@ -3,7 +3,7 @@ from app.mq.client.mqttclienthelper import MqttClientHelper
 
 
 class MqttClient(MqttClientHelper):
-    def __init__(self, config, logger):
+    def __init__(self, logger, config):
         self.logger = logger
         self.config = config
 

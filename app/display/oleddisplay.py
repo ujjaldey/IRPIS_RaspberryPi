@@ -9,7 +9,7 @@ ESP8266_STATUS_CHECK_TIMEOUT_SEC = 10
 
 
 class OledDisplay(OledDisplayHelper):
-    def __init__(self, config, logger):
+    def __init__(self, logger, config):
         self.logger = logger
         self.config = config
 

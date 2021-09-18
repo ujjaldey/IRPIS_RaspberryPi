@@ -43,3 +43,9 @@ class Config:
 
     def get_mqtt_sender(self):
         return self.config['MQTT_SENDER']
+
+    def get_database_connection(self):
+        return self.config['DATABASE_CONNECTION']
+
+    def get_database_file(self):
+        return self.config['DATABASE_FILE']

@@ -7,6 +7,7 @@ from app.irpis.irpismain import IrpisMain
 from app.mq.client.mqttclient import MqttClient
 from app.util.config import Config
 from app.util.logger import Logger
+from app.util.sqlitedb import SqliteDb
 
 
 class Main:
@@ -15,13 +16,13 @@ class Main:
         self.logger = logger.get_logger()
 
         self.config = Config()
-        self.db = None  # @TODO
+        self.db = SqliteDb(self.config)
 
-        self.mqtt_client = MqttClient(self.config, self.logger)
-        self.telegram_bot = TelegramBot(self.config, self.logger)
+        self.mqtt_client = MqttClient(self.logger, self.config)
+        self.telegram_bot = TelegramBot(self.logger, self.config)
         self.telegram_bot.add_handlers()
-        self.display = OledDisplay(self.config, self.logger)
-        self.irpis = IrpisMain(self.config, self.logger)
+        self.display = OledDisplay(self.logger, self.config)
+        self.irpis = IrpisMain(self.logger, self.config, self.db)
 
         self.thread_fns = [self.__start_mqtt_telegrambot, self.__start_display_main, self.__start_irpis_main]
         self.threads = []

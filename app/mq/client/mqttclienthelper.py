@@ -18,7 +18,7 @@ class MqttClientHelper:
         msg_str = str(msg.payload.decode('utf-8'))
         self.logger.info(f'Received topic {msg.topic} with message: {msg_str}')
 
-        telegram_bot = TelegramBot(self.config, self.logger)
+        telegram_bot = TelegramBot(self.logger, self.config)
 
         resp_sender, resp_success, resp_type, resp_status, resp_duration, resp_message = \
             self.__parse_response(msg_str)
