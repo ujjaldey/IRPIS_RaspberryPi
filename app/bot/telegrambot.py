@@ -2,7 +2,7 @@ from telegram import ParseMode
 from telegram.ext import Defaults, Updater, CommandHandler
 
 from app.bot.telegrambothelper import TelegramBotHelper
-from app.common.utils import Util
+from app.util.common import Util
 
 
 class TelegramBot(TelegramBotHelper):

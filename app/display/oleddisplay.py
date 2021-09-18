@@ -1,7 +1,7 @@
 import math
 import time
 
-from app.common.utils import Util
+from app.util.common import Util
 from app.display.oleddisplayenum import OledDisplayEnum
 from app.display.oleddisplayhelper import OledDisplayHelper
 

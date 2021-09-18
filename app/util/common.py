@@ -20,5 +20,6 @@ class Util:
         for unit, div in duration_units:
             amount, seconds = divmod(int(seconds), div)
             if amount > 0:
-                parts.append('{} {}{}'.format(amount, unit, '' if (amount == 1 or input_seconds >= 3600) else 's'))
+                parts.append('{} {}{}'.format(
+                    amount, unit, '' if (amount == 1 or (short and input_seconds >= 3600)) else 's'))
         return ' '.join(parts)

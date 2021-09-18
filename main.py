@@ -5,8 +5,8 @@ from app.bot.telegrambot import TelegramBot
 from app.display.oleddisplay import OledDisplay
 from app.irpis.irpismain import IrpisMain
 from app.mq.client.mqttclient import MqttClient
-from util.config import Config
-from util.logger import Logger
+from app.util.config import Config
+from app.util.logger import Logger
 
 
 class Main:
