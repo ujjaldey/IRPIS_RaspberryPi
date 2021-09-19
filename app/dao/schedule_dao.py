@@ -9,7 +9,7 @@ class ScheduleDao:
     def __init__(self):
         self.table = Table(
             "schedules", MetaData(),
-            Column("next_schedule", String, nullable=False),
+            Column("next_schedule_at", String, nullable=False),
             Column("duration", Integer, nullable=False),
             Column("created_at", String, nullable=True, default=datetime.now),
             Column("updated_at", String, nullable=True, default=datetime.now)
@@ -22,14 +22,14 @@ class ScheduleDao:
         try:
             schedules = []
             stmt = select(
-                [self.table.c.next_schedule, self.table.c.duration, self.table.c.created_at,
+                [self.table.c.next_schedule_at, self.table.c.duration, self.table.c.created_at,
                  self.table.c.updated_at])
 
             out_cur = conn.execute(stmt)
             rec = out_cur.fetchone()
 
-            schedule = None if not rec['next_schedule'] else Schedule(
-                next_schedule=datetime.strptime(rec['next_schedule'], '%Y-%m-%d %H:%M:%S'),
+            schedule = None if not rec['next_schedule_at'] else Schedule(
+                next_schedule_at=datetime.strptime(rec['next_schedule_at'], '%Y-%m-%d %H:%M:%S'),
                 duration=int(rec['duration']),
                 created_at=datetime.strptime(rec['created_at'], '%Y-%m-%d %H:%M:%S'),
                 updated_at=datetime.strptime(rec['updated_at'], '%Y-%m-%d %H:%M:%S'))
@@ -41,7 +41,7 @@ class ScheduleDao:
 
     def upsert(self, conn, schedule):
         try:
-            stmt = select(func.count(self.table.c.next_schedule).label('rec_count'))
+            stmt = select(func.count(self.table.c.next_schedule_at).label('rec_count'))
 
             out_cur = conn.execute(stmt)
             rec = out_cur.fetchone()
@@ -49,10 +49,12 @@ class ScheduleDao:
             next_schedule_exists = (rec['rec_count'] > 0)
 
             if next_schedule_exists:
-                stmt = self.table.update().values(next_schedule=schedule.next_schedule, duration=schedule.duration,
+                stmt = self.table.update().values(next_schedule_at=schedule.next_schedule_at,
+                                                  duration=schedule.duration,
                                                   updated_at=schedule.updated_at)
             else:
-                stmt = self.table.insert().values(next_schedule=schedule.next_schedule, duration=schedule.duration,
+                stmt = self.table.insert().values(next_schedule_at=schedule.next_schedule_at,
+                                                  duration=schedule.duration,
                                                   created_at=schedule.created_at, updated_at=schedule.updated_at)
 
             ret = conn.execute(stmt)
