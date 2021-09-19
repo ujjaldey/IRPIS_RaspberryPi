@@ -1,6 +1,7 @@
 import datetime
 from time import sleep
 
+from app.dao.execution_dao import ExecutionDao
 from app.dao.schedule_dao import ScheduleDao
 from app.irpis.irpismainhelper import IrpisMainHelper
 from app.model.schedule import Schedule
@@ -32,12 +33,17 @@ class IrpisMain(IrpisMainHelper):
             schedule = schedule_dao.select(self.conn)
 
             next_schedule, duration = (schedule.next_schedule_at, schedule.duration) if schedule else (None, 0)
-            self.display.set_next_schedule(next_schedule, duration)
+            self.display.set_next_schedule(next_schedule, duration)  # @TODO pass schedule as param, like execution below
+
+            execution_dao = ExecutionDao()
+            execution = execution_dao.select_latest(self.conn)
+
+            self.display.set_last_execution(execution)
 
             if datetime.datetime.now() >= next_schedule:
-                self.mqtt_client.turn_on_payload(duration)
+                self.mqtt_client.turn_on_payload(duration, 'SCHEDULED')
                 schedule = Schedule(
-                    next_schedule_at=datetime.datetime.now().replace(microsecond=0) + datetime.timedelta(minutes=30),
+                    next_schedule_at=datetime.datetime.now().replace(microsecond=0) + datetime.timedelta(minutes=1),
                     duration=15, created_at=datetime.datetime.now().replace(microsecond=0),
                     updated_at=datetime.datetime.now().replace(microsecond=0))
                 success = schedule_dao.upsert(self.conn, schedule)

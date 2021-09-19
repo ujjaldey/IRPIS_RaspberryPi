@@ -3,14 +3,17 @@ from app.mq.client.mqttclienthelper import MqttClientHelper
 
 
 class MqttClient(MqttClientHelper):
-    def __init__(self, logger, config):
+    def __init__(self, logger, config, db):
         self.logger = logger
         self.config = config
+        self.db = db
+        self.conn = db.connect().execution_options(autocommit=True)
 
         self.mqtt_broker = MqttBroker(config, logger)
         self.mqtt_client = None
         self._is_connected = False
         self.display = None
+        self.execution_id = 0
 
     def connect(self):
         self.mqtt_client = self.mqtt_broker.connect()
@@ -22,6 +25,9 @@ class MqttClient(MqttClientHelper):
 
     def set_display(self, display):
         self.display = display
+
+    def set_execution_id(self, execution_id):
+        self.execution_id = execution_id
 
     def is_connected(self):
         return self._is_connected

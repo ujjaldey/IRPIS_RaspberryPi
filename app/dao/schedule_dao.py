@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import Column, MetaData, String, Table, Integer, select, and_, func
+from sqlalchemy import Column, MetaData, String, Table, Integer, select, func
 
 from app.model.schedule import Schedule
 
@@ -10,17 +10,13 @@ class ScheduleDao:
         self.table = Table(
             "schedules", MetaData(),
             Column("next_schedule_at", String, nullable=False),
-            Column("duration", Integer, nullable=False),
+            Column("duration", Integer, nullable=False, default=0),
             Column("created_at", String, nullable=True, default=datetime.now),
             Column("updated_at", String, nullable=True, default=datetime.now)
         )
 
-    # def dao_table(self):
-    #     return self.table
-
     def select(self, conn):
         try:
-            schedules = []
             stmt = select(
                 [self.table.c.next_schedule_at, self.table.c.duration, self.table.c.created_at,
                  self.table.c.updated_at])

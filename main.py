@@ -18,7 +18,7 @@ class Main:
         self.config = Config()
         self.db = SqliteDb(self.config)
 
-        self.mqtt_client = MqttClient(self.logger, self.config)
+        self.mqtt_client = MqttClient(self.logger, self.config, self.db)
         self.telegram_bot = TelegramBot(self.logger, self.config)
         self.telegram_bot.add_handlers()
         self.display = OledDisplay(self.logger, self.config)
