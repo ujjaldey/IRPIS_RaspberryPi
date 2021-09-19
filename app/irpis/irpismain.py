@@ -32,11 +32,12 @@ class IrpisMain(IrpisMainHelper):
             schedule = schedule_dao.select(self.conn)
 
             next_schedule, duration = (schedule.next_schedule, schedule.duration) if schedule else (None, 0)
+            self.display.set_next_schedule(next_schedule, duration)
 
             if datetime.datetime.now() >= next_schedule:
                 self.mqtt_client.turn_on_payload(duration)
                 schedule = Schedule(
-                    next_schedule=datetime.datetime.now().replace(microsecond=0) + datetime.timedelta(minutes=1),
+                    next_schedule=datetime.datetime.now().replace(microsecond=0) + datetime.timedelta(minutes=30),
                     duration=15, created_at=datetime.datetime.now().replace(microsecond=0),
                     updated_at=datetime.datetime.now().replace(microsecond=0))
                 success = schedule_dao.upsert(self.conn, schedule)

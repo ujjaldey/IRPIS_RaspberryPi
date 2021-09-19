@@ -80,8 +80,9 @@ class Main:
 
 
 if __name__ == '__main__':
+    main = Main()
+
     try:
-        main = Main()
         main.start()
     except (KeyboardInterrupt, SystemExit):
         main.terminate()

@@ -1,3 +1,6 @@
+from datetime import date
+
+
 class Util:
     @staticmethod
     def convert_secs_to_human_format(seconds, short=False):
@@ -23,3 +26,27 @@ class Util:
                 parts.append('{} {}{}'.format(
                     amount, unit, '' if (amount == 1 or (short and input_seconds >= 3600)) else 's'))
         return ' '.join(parts)
+
+    @staticmethod
+    def convert_date_to_human_format(date_time):
+        diff = (date_time.date() - date.today()).days
+
+        if diff == 0:
+            human_date = "Today"
+        elif diff == -1:
+            human_date = "Yesterday"
+        elif diff == 1:
+            human_date = "Tomorrow"
+        elif diff == 2:
+            human_date = "Day after Tomorrow"
+        elif abs(diff) < 4:
+            human_date = f"{abs(diff)} days ago" if diff < 0 else f"In {abs(diff)} days"
+        elif abs(diff) <= 7:
+            last_next = "Last" if diff < 0 else "Next" if diff == 7 else "This"
+            day = date_time.strftime("%A")
+            human_date = f"{last_next} {day}"
+        else:
+            day = date_time.strftime("%d-%m-%Y")
+            human_date = f"On {day}"
+
+        return human_date

@@ -22,6 +22,8 @@ class TelegramBotHelper:
     def _on(self, update: Update, context: CallbackContext):
         self.logger.info('_on is called')
 
+        duration = 0
+
         if len(context.args) < 1:
             response_msg = 'Enter the duration!'
             success = False

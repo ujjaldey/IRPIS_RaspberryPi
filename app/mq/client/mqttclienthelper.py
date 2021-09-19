@@ -72,5 +72,5 @@ class MqttClientHelper:
         return resp_sender, resp_success, resp_type, resp_status, resp_duration, resp_message
 
     @staticmethod
-    def __validate_response(mqtt_topic, mqtt_sender, topic, type, sender):
-        return sender == mqtt_sender and topic == mqtt_topic and type in [TYPE_COMMAND, TYPE_ALIVE]
+    def __validate_response(mqtt_topic, mqtt_sender, topic, msg_type, sender):
+        return sender == mqtt_sender and topic == mqtt_topic and msg_type in [TYPE_COMMAND, TYPE_ALIVE]

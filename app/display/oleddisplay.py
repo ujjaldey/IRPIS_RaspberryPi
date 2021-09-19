@@ -1,5 +1,6 @@
 import math
 import time
+from datetime import date
 
 from app.util.common import Util
 from app.display.oleddisplayenum import OledDisplayEnum
@@ -26,6 +27,9 @@ class OledDisplay(OledDisplayHelper):
         self.duration = 0
         self.active_end_sec = 0
 
+        self.next_schedule = date.today()
+        self.duration = 0
+
         self.util = Util()
 
     def set_wifi_online(self, online):
@@ -36,6 +40,10 @@ class OledDisplay(OledDisplayHelper):
             self.esp8266_status_check_sec = int(time.time())
 
         self.esp8266_online = online
+
+    def set_next_schedule(self, next_schedule, duration):
+        self.next_schedule = next_schedule
+        self.duration = duration
 
     def cleanup(self):
         self._cleanup()

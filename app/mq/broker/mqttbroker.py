@@ -1,7 +1,7 @@
 import paho.mqtt.client as mqtt
 
 
-class MqttBroker():
+class MqttBroker:
     def __init__(self, config, logger):
         self.config = config
         self.logger = logger
