@@ -14,6 +14,7 @@ class ExecutionDao:
             Column("duration", Integer, nullable=False, default=0),
             Column("type", String, nullable=False),
             Column("status", String),
+            Column("error", String),
             Column("created_at", String, nullable=True, default=datetime.now),
             Column("updated_at", String, nullable=True, default=datetime.now)
         )
@@ -22,7 +23,8 @@ class ExecutionDao:
         try:
             stmt = select(
                 [self.table.c.id, self.table.c.executed_at, self.table.c.duration, self.table.c.type,
-                 self.table.c.status, self.table.c.created_at, self.table.c.updated_at]) \
+                 self.table.c.status, self.table.c.error, self.table.c.created_at, self.table.c.updated_at]) \
+                .where(self.table.c.status == 'COMPLETED') \
                 .order_by(self.table.c.executed_at.desc())
 
             out_cur = conn.execute(stmt)
@@ -34,6 +36,7 @@ class ExecutionDao:
                 duration=int(rec['duration']),
                 type=rec['type'],
                 status=rec['status'],
+                error=rec['error'],
                 created_at=datetime.strptime(rec['created_at'], '%Y-%m-%d %H:%M:%S'),
                 updated_at=datetime.strptime(rec['updated_at'], '%Y-%m-%d %H:%M:%S'))
 
@@ -46,8 +49,17 @@ class ExecutionDao:
         stmt = self.table \
             .insert() \
             .values(executed_at=execution.executed_at,
-                    duration=execution.duration, type=execution.type, status=execution.status,
+                    duration=execution.duration, type=execution.type, status=execution.status, error=execution.error,
                     created_at=execution.created_at, updated_at=execution.updated_at)
+
+        ret = conn.execute(stmt)
+        return True, ret.lastrowid
+
+    def update_status(self, conn, id, status, error):
+        stmt = self.table \
+            .update() \
+            .values(status=status, error=error, updated_at=datetime.now().replace(microsecond=0)) \
+            .where(self.table.c.id == id)
 
         ret = conn.execute(stmt)
         return True, ret.lastrowid

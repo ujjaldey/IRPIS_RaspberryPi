@@ -43,7 +43,7 @@ class IrpisMain(IrpisMainHelper):
             if datetime.datetime.now() >= next_schedule:
                 self.mqtt_client.turn_on_payload(duration, 'SCHEDULED')
                 schedule = Schedule(
-                    next_schedule_at=datetime.datetime.now().replace(microsecond=0) + datetime.timedelta(minutes=1),
+                    next_schedule_at=datetime.datetime.now().replace(microsecond=0) + datetime.timedelta(minutes=2),
                     duration=15, created_at=datetime.datetime.now().replace(microsecond=0),
                     updated_at=datetime.datetime.now().replace(microsecond=0))
                 success = schedule_dao.upsert(self.conn, schedule)

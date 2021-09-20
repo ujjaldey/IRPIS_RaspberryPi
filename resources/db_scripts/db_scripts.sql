@@ -12,6 +12,7 @@ create table "executions" (
 	"duration"	            integer not null default 0,
 	"type"	                text not null,
 	"status"	            text,
+	"error"                 text,
 	"created_at"	        text,
 	"updated_at"	        text,
 	primary key("id" AUTOINCREMENT)

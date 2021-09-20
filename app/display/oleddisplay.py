@@ -32,7 +32,7 @@ class OledDisplay(OledDisplayHelper):
 
         self.last_execution = date.today()
         self.last_duration = 0
-        self.last_execution_type = 'S'
+        self.last_execution_type = 'Scheduled'
 
         self.util = Util()
 
@@ -52,7 +52,7 @@ class OledDisplay(OledDisplayHelper):
     def set_last_execution(self, execution):
         self.last_execution = execution.executed_at
         self.last_duration = execution.duration
-        self.last_execution_type = execution.type[0]
+        self.last_execution_type = execution.type.capitalize()
 
     def cleanup(self):
         self._cleanup()
