@@ -61,8 +61,8 @@ class OledDisplay(OledDisplayHelper):
         pages = [OledDisplayEnum.NOW, OledDisplayEnum.NEXT_SCHEDULE, OledDisplayEnum.LAST_RUN]
         counter = 0
         display_off_counter_sec = int(time.time())
+        display_change_counter_sec = int(time.time()) - self.config.get_display_change_duration_sec()
         self.esp8266_status_check_sec = int(time.time())
-        change_duration = self.config.get_display_change_duration_sec()
         backlight_enabled = True
 
         while True:
@@ -73,11 +73,12 @@ class OledDisplay(OledDisplayHelper):
                 display_off_counter_sec = int(time.time())
                 backlight_enabled = True
             else:
-                self._show_dashboard(pages[math.floor(counter / change_duration)])
-                counter = counter + 1
-
-                if counter >= 3 * change_duration:
-                    counter = 0
+                if int(time.time()) >= display_change_counter_sec + self.config.get_display_change_duration_sec():
+                    self._show_dashboard(pages[counter])
+                    display_change_counter_sec = int(time.time())
+                    counter = counter + 1
+                    if counter >= len(pages):
+                        counter = 0
 
                 if backlight_enabled and int(
                         time.time()) >= display_off_counter_sec + self.config.get_display_timeout_sec():
