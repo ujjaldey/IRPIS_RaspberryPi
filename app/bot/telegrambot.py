@@ -10,6 +10,8 @@ class TelegramBot(TelegramBotHelper):
         self.logger = logger
         self.config = config
         self.mqtt_client = None
+        self.display = None
+
         self.util = Util()
 
         defaults = Defaults(parse_mode=ParseMode.HTML)
@@ -23,8 +25,12 @@ class TelegramBot(TelegramBotHelper):
         if mqtt_client:
             self._greet_message()
 
+    def set_display(self, display):
+        self.display = display
+
     def add_handlers(self):
         self.dp.add_handler(CommandHandler('status', self._status))
+        self.dp.add_handler(CommandHandler('display', self._display))
         self.dp.add_handler(CommandHandler('on', self._on))
         self.dp.add_handler(CommandHandler('off', self._off))
 

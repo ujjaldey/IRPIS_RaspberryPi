@@ -18,6 +18,9 @@ class OledDisplayHelper:
         self.duration = duration
         self.active_end_sec = int(time.time()) + self.duration
 
+    def _set_display_off_counter_sec(self, display_off_counter_sec):
+        self.display_off_counter_sec = display_off_counter_sec
+
     # def __do_nothing(self, obj):
     #     pass
 
@@ -113,8 +116,9 @@ class OledDisplayHelper:
         except Exception as e:
             print(e)
 
-    def enable_backlight(self, on_off):
+    def display_on_off(self, on_off):
         if on_off:
+            self._set_display_off_counter_sec(int(time.time()))
             self.device.show()
         else:
             self.device.hide()

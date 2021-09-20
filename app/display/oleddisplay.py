@@ -36,6 +36,8 @@ class OledDisplay(OledDisplayHelper):
 
         self.util = Util()
 
+        self.display_off_counter_sec = int(time.time())
+
     def set_wifi_online(self, online):
         self.wifi_online = online
 
@@ -60,18 +62,15 @@ class OledDisplay(OledDisplayHelper):
     def start(self):
         pages = [OledDisplayEnum.NOW, OledDisplayEnum.NEXT_SCHEDULE, OledDisplayEnum.LAST_RUN]
         counter = 0
-        display_off_counter_sec = int(time.time())
+        self.display_off_counter_sec = int(time.time())
         display_change_counter_sec = int(time.time()) - self.config.get_display_change_duration_sec()
         self.esp8266_status_check_sec = int(time.time())
-        backlight_enabled = True
 
         while True:
             if self.active:
-                self.duration = self.duration - .5
                 self._show_dashboard(OledDisplayEnum.ACTIVE)
                 counter = 0
-                display_off_counter_sec = int(time.time())
-                backlight_enabled = True
+                self.display_off_counter_sec = int(time.time())
             else:
                 if int(time.time()) >= display_change_counter_sec + self.config.get_display_change_duration_sec():
                     self._show_dashboard(pages[counter])
@@ -80,10 +79,8 @@ class OledDisplay(OledDisplayHelper):
                     if counter >= len(pages):
                         counter = 0
 
-                if backlight_enabled and int(
-                        time.time()) >= display_off_counter_sec + self.config.get_display_timeout_sec():
-                    backlight_enabled = False
-                    self.enable_backlight(backlight_enabled)
+                if int(time.time()) >= self.display_off_counter_sec + self.config.get_display_timeout_sec():
+                    self.display_on_off(False)
 
             if int(time.time()) >= self.esp8266_status_check_sec + ESP8266_STATUS_CHECK_TIMEOUT_SEC:
                 self.esp8266_online = False

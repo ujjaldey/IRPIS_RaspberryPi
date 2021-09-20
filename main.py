@@ -53,6 +53,7 @@ class Main:
         self.logger.info('Creating new thread for Display')
 
         try:
+            self.telegram_bot.set_display(self.display)
             self.mqtt_client.set_display(self.display)
             self.display.start()
         except Exception as ex:

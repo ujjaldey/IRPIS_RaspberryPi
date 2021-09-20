@@ -42,13 +42,13 @@ class MqttClientHelper:
                 else:
                     if status_str == STATUS_ON:
                         self.display.set_active(True, duration)
-                        self.display.enable_backlight(True)
+                        self.display.display_on_off(True)
                         self.set_execution_id(resp_execution_id)
                         success, execution_id = self.execution_dao.update_status(self.conn, resp_execution_id,
                                                                                  'STARTED', '')
                     elif status_str == STATUS_OFF:
                         self.display.set_active(False)
-                        self.display.enable_backlight(True)
+                        self.display.display_on_off(True)
                         success, execution_id = self.execution_dao.update_status(self.conn, resp_execution_id,
                                                                                  'COMPLETED', '')
                         self.set_execution_id(0)
@@ -72,6 +72,7 @@ class MqttClientHelper:
     def esp8266_status(self):
         self.mqtt_client.publish(self.config.get_mqtt_command_topic(),
                                  self.build_mqtt_payload('STATUS'))
+        self.display.display_on_off(True)
 
     def turn_on_payload(self, duration, trigger_type):
         execution = Execution(
