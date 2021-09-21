@@ -85,13 +85,11 @@ class MqttClientHelper:
             created_at=datetime.now().replace(microsecond=0),
             updated_at=datetime.now().replace(microsecond=0))
         success, execution_id = self.execution_dao.insert(self.conn, execution)
-        print(success, execution_id)
 
         self.mqtt_client.publish(self.config.get_mqtt_command_topic(),
                                  self.build_mqtt_payload('ON', duration, execution_id))
 
     def turn_off_payload(self):
-        print("off", self.execution_id)
         self.mqtt_client.publish(self.config.get_mqtt_command_topic(),
                                  self.build_mqtt_payload('OFF', 0, self.execution_id))
 

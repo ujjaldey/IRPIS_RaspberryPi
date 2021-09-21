@@ -2,13 +2,13 @@ from datetime import datetime
 
 from sqlalchemy import Column, MetaData, String, Table, Integer, select, func
 
-from app.model.schedule import Schedule
+from app.model.next_schedule import NextSchedule
 
 
-class ScheduleDao:
+class NextScheduleDao:
     def __init__(self):
         self.table = Table(
-            "schedules", MetaData(),
+            "next_schedules", MetaData(),
             Column("next_schedule_at", String, nullable=False),
             Column("duration", Integer, nullable=False, default=0),
             Column("created_at", String, nullable=True, default=datetime.now),
@@ -24,7 +24,7 @@ class ScheduleDao:
             out_cur = conn.execute(stmt)
             rec = out_cur.fetchone()
 
-            schedule = None if not rec['next_schedule_at'] else Schedule(
+            schedule = None if not rec['next_schedule_at'] else NextSchedule(
                 next_schedule_at=datetime.strptime(rec['next_schedule_at'], '%Y-%m-%d %H:%M:%S'),
                 duration=int(rec['duration']),
                 created_at=datetime.strptime(rec['created_at'], '%Y-%m-%d %H:%M:%S'),
