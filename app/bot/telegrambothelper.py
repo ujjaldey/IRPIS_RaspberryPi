@@ -14,7 +14,7 @@ class TelegramBotHelper:
     def _status(self, update: Update, context: CallbackContext):
         self.mqtt_client.esp8266_status()
 
-    def _display(self, update: Update, context: CallbackContext):
+    def _wakeup(self, update: Update, context: CallbackContext):
         response_msg = 'OK. Turning on the display...'
         context.bot.send_message(chat_id=self.config.get_telegram_chat_id(), text=response_msg)
         self.display.display_on_off(True)
