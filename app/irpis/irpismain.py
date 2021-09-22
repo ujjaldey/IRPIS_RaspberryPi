@@ -36,8 +36,8 @@ class IrpisMain(IrpisMainHelper):
             schedule = next_schedule_dao.select(self.conn)
 
             next_schedule, duration = (schedule.next_schedule_at, schedule.duration) if schedule else (None, 0)
-            self.display.set_next_schedule(next_schedule,
-                                           duration)  # @TODO pass schedule as param, like execution below
+            # @TODO pass schedule as param, like execution below
+            self.display.set_next_schedule(next_schedule, duration)
 
             execution_dao = ExecutionDao()
             execution = execution_dao.select_latest(self.conn)
@@ -45,13 +45,14 @@ class IrpisMain(IrpisMainHelper):
             self.display.set_last_execution(execution)
 
             if datetime.datetime.now() >= next_schedule:
-                for x in schedule_dao.select(self.conn):
-                    print(x.id, x.schedule_time, x.duration)
-
                 self.mqtt_client.turn_on_payload(duration, 'SCHEDULED')
+
+                schedules = schedule_dao.select(self.conn)
+                next_schedule, next_duration = self._calculate_next_schedule_and_duration(schedules)
+
                 schedule = NextSchedule(
-                    next_schedule_at=datetime.datetime.now().replace(microsecond=0) + datetime.timedelta(minutes=5),
-                    duration=15, created_at=datetime.datetime.now().replace(microsecond=0),
+                    next_schedule_at=next_schedule, duration=next_duration,
+                    created_at=datetime.datetime.now().replace(microsecond=0),
                     updated_at=datetime.datetime.now().replace(microsecond=0))
                 success = next_schedule_dao.upsert(self.conn, schedule)
 
