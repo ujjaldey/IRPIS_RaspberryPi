@@ -36,6 +36,7 @@ class TelegramBot(TelegramBotHelper):
         self.dp.add_handler(CommandHandler('wakeup', self._wakeup))
         self.dp.add_handler(CommandHandler('on', self._on))
         self.dp.add_handler(CommandHandler('off', self._off))
+        self.dp.add_handler(CommandHandler('next', self._next))
         self.dp.add_handler(CommandHandler('last', self._last))
 
     def start(self):

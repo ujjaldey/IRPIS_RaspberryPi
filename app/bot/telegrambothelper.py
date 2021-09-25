@@ -6,6 +6,7 @@ from telegram import Update
 from telegram.ext import CallbackContext
 
 from app.dao.execution_dao import ExecutionDao
+from app.dao.next_schedule_dao import NextScheduleDao
 
 
 class TelegramBotHelper:
@@ -58,6 +59,19 @@ class TelegramBotHelper:
 
         self.mqtt_client.turn_off_payload()
 
+    def _next(self, update: Update, context: CallbackContext):
+        self.logger.info('_next is called')
+
+        next_schedule_dao = NextScheduleDao()
+        schedule = next_schedule_dao.select(self.conn)
+
+        schedule_time = schedule.next_schedule_at.strftime('%H:%M')
+
+        response_msg = f'Next Execution:' + \
+                       f'\n{self.util.convert_date_to_human_format(schedule.next_schedule_at)} at {schedule_time} ' + \
+                       f'for {self.util.convert_secs_to_human_format(schedule.duration)}'
+        context.bot.send_message(chat_id=self.config.get_telegram_chat_id(), text=response_msg)
+
     def _last(self, update: Update, context: CallbackContext):
         self.logger.info('_last is called')
 
@@ -65,7 +79,7 @@ class TelegramBotHelper:
         execution = execution_dao.select_latest(self.conn)
 
         execution_date = execution.executed_at
-        execution_time = execution.executed_at.strftime('%H:%M:%S')
+        execution_time = execution.executed_at.strftime('%H:%M')
 
         response_msg = f'Last Run:' + \
                        f'\n{self.util.convert_date_to_human_format(execution_date)} at {execution_time} ' + \
