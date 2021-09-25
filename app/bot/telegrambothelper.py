@@ -5,6 +5,8 @@ from dateutil import parser
 from telegram import Update
 from telegram.ext import CallbackContext
 
+from app.dao.execution_dao import ExecutionDao
+
 
 class TelegramBotHelper:
     def _greet_message(self):
@@ -55,6 +57,21 @@ class TelegramBotHelper:
         context.bot.send_message(chat_id=self.config.get_telegram_chat_id(), text=response_msg)
 
         self.mqtt_client.turn_off_payload()
+
+    def _last(self, update: Update, context: CallbackContext):
+        self.logger.info('_last is called')
+
+        execution_dao = ExecutionDao()
+        execution = execution_dao.select_latest(self.conn)
+
+        execution_date = execution.executed_at
+        execution_time = execution.executed_at.strftime('%H:%M:%S')
+
+        response_msg = f'Last Run:' + \
+                       f'\n{self.util.convert_date_to_human_format(execution_date)} at {execution_time} ' + \
+                       f'for {self.util.convert_secs_to_human_format(execution.duration)} ' + \
+                       f'({execution.type.capitalize()})'
+        context.bot.send_message(chat_id=self.config.get_telegram_chat_id(), text=response_msg)
 
     def _send_response(self, message):
         self.updater.bot.send_message(chat_id=self.config.get_telegram_chat_id(), text=message)

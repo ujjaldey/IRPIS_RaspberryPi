@@ -6,9 +6,12 @@ from app.util.common import Util
 
 
 class TelegramBot(TelegramBotHelper):
-    def __init__(self, logger, config):
+    def __init__(self, logger, config, db):
         self.logger = logger
         self.config = config
+        self.db = db
+        self.conn = db.connect().execution_options(autocommit=True)
+
         self.mqtt_client = None
         self.display = None
 
@@ -33,6 +36,7 @@ class TelegramBot(TelegramBotHelper):
         self.dp.add_handler(CommandHandler('wakeup', self._wakeup))
         self.dp.add_handler(CommandHandler('on', self._on))
         self.dp.add_handler(CommandHandler('off', self._off))
+        self.dp.add_handler(CommandHandler('last', self._last))
 
     def start(self):
         self.updater.start_polling()
