@@ -1,7 +1,7 @@
 from app.dao.execution_dao import ExecutionDao
 from app.mq.broker.mqttbroker import MqttBroker
 from app.mq.client.mqttclienthelper import MqttClientHelper
-from app.util.common import Util
+from app.util.common import Common
 
 
 class MqttClient(MqttClientHelper):
@@ -18,7 +18,7 @@ class MqttClient(MqttClientHelper):
         self.display = None
         self.execution_id = 0
 
-        self.util = Util()
+        self.common = Common()
 
     def connect(self):
         self.mqtt_client = self.mqtt_broker.connect()

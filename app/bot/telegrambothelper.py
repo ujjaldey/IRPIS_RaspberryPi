@@ -7,6 +7,7 @@ from telegram.ext import CallbackContext
 
 from app.dao.execution_dao import ExecutionDao
 from app.dao.next_schedule_dao import NextScheduleDao
+from app.model.next_schedule import NextSchedule
 
 
 class TelegramBotHelper:
@@ -37,7 +38,7 @@ class TelegramBotHelper:
 
                 if duration > 0:
                     response_msg = \
-                        f'OK. Turning the irrigation on for {self.util.convert_secs_to_human_format(duration)}...'
+                        f'OK. Turning the irrigation on for {self.common.convert_secs_to_human_format(duration)}...'
                     success = True
                 else:
                     response_msg = 'Invalid duration!'
@@ -67,9 +68,9 @@ class TelegramBotHelper:
 
         schedule_time = schedule.next_schedule_at.strftime('%H:%M')
 
-        response_msg = f'Next Execution:' + \
-                       f'\n{self.util.convert_date_to_human_format(schedule.next_schedule_at)} at {schedule_time} ' + \
-                       f'for {self.util.convert_secs_to_human_format(schedule.duration)}'
+        response_msg = f'Next Schedule:' + \
+                       f'\n{self.common.convert_date_to_human_format(schedule.next_schedule_at)} at {schedule_time} ' + \
+                       f'for {self.common.convert_secs_to_human_format(schedule.duration)}'
         context.bot.send_message(chat_id=self.config.get_telegram_chat_id(), text=response_msg)
 
     def _last(self, update: Update, context: CallbackContext):
@@ -82,9 +83,35 @@ class TelegramBotHelper:
         execution_time = execution.executed_at.strftime('%H:%M')
 
         response_msg = f'Last Run:' + \
-                       f'\n{self.util.convert_date_to_human_format(execution_date)} at {execution_time} ' + \
-                       f'for {self.util.convert_secs_to_human_format(execution.duration)} ' + \
+                       f'\n{self.common.convert_date_to_human_format(execution_date)} at {execution_time} ' + \
+                       f'for {self.common.convert_secs_to_human_format(execution.duration)} ' + \
                        f'({execution.type.capitalize()})'
+        context.bot.send_message(chat_id=self.config.get_telegram_chat_id(), text=response_msg)
+
+    def _skip(self, update: Update, context: CallbackContext):
+        self.logger.info('_skip is called')
+
+        next_schedule_dao = NextScheduleDao()
+        curr_schedule = next_schedule_dao.select(self.conn)
+        curr_schedule_at = curr_schedule.next_schedule_at
+
+        curr_schedule_time = curr_schedule.next_schedule_at.strftime('%H:%M')
+
+        next_schedule, next_duration = self.common.calculate_next_schedule_and_duration(self.conn,
+                                                                                        curr_schedule.next_schedule_at)
+        new_schedule_time = next_schedule.strftime('%H:%M')
+
+        schedule = NextSchedule(
+            next_schedule_at=next_schedule, duration=next_duration,
+            created_at=datetime.now().replace(microsecond=0),
+            updated_at=datetime.now().replace(microsecond=0))
+        success = next_schedule_dao.upsert(self.conn, schedule)
+
+        response_msg = f'Skipped schedule: {self.common.convert_date_to_human_format(curr_schedule_at)} at ' + \
+                       f'{curr_schedule_time} for ' + \
+                       f'{self.common.convert_secs_to_human_format(curr_schedule.duration)}' + \
+                       f'\nNew schedule: {self.common.convert_date_to_human_format(next_schedule)} at ' + \
+                       f'{new_schedule_time} for {self.common.convert_secs_to_human_format(next_duration)}'
         context.bot.send_message(chat_id=self.config.get_telegram_chat_id(), text=response_msg)
 
     def _send_response(self, message):

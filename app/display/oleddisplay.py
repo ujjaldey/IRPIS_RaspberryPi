@@ -2,7 +2,7 @@ import math
 import time
 from datetime import date
 
-from app.util.common import Util
+from app.util.common import Common
 from app.display.oleddisplayenum import OledDisplayEnum
 from app.display.oleddisplayhelper import OledDisplayHelper
 
@@ -34,7 +34,7 @@ class OledDisplay(OledDisplayHelper):
         self.last_duration = 0
         self.last_execution_type = 'Scheduled'
 
-        self.util = Util()
+        self.common = Common()
 
         self.display_off_counter_sec = int(time.time())
 

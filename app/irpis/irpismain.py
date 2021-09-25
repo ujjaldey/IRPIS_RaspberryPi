@@ -1,11 +1,12 @@
 import datetime
+from datetime import datetime
 from time import sleep
 
 from app.dao.execution_dao import ExecutionDao
 from app.dao.next_schedule_dao import NextScheduleDao
-from app.dao.schedule_dao import ScheduleDao
 from app.irpis.irpismainhelper import IrpisMainHelper
 from app.model.next_schedule import NextSchedule
+from app.util.common import Common
 
 
 class IrpisMain(IrpisMainHelper):
@@ -17,6 +18,8 @@ class IrpisMain(IrpisMainHelper):
 
         self.display = None
         self.mqtt_client = None
+
+        self.common = Common()
 
     def set_display(self, display):
         self.display = display
@@ -30,8 +33,6 @@ class IrpisMain(IrpisMainHelper):
             # TODO should be checked at certain interval only
             self.display.set_wifi_online(self._is_internet_connected())
 
-            schedule_dao = ScheduleDao()
-
             next_schedule_dao = NextScheduleDao()
             schedule = next_schedule_dao.select(self.conn)
 
@@ -44,16 +45,16 @@ class IrpisMain(IrpisMainHelper):
 
             self.display.set_last_execution(execution)
 
-            if datetime.datetime.now() >= next_schedule:
+            if datetime.now() >= next_schedule:
                 self.mqtt_client.turn_on_payload(duration, 'SCHEDULED')
 
-                schedules = schedule_dao.select(self.conn)
-                next_schedule, next_duration = self._calculate_next_schedule_and_duration(schedules)
+                now = datetime.now().replace(microsecond=0)
+                next_schedule, next_duration = self._calculate_next_schedule_and_duration(self.conn, now)
 
                 schedule = NextSchedule(
                     next_schedule_at=next_schedule, duration=next_duration,
-                    created_at=datetime.datetime.now().replace(microsecond=0),
-                    updated_at=datetime.datetime.now().replace(microsecond=0))
+                    created_at=datetime.now().replace(microsecond=0),
+                    updated_at=datetime.now().replace(microsecond=0))
                 success = next_schedule_dao.upsert(self.conn, schedule)
 
             sleep(1)

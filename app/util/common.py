@@ -1,7 +1,9 @@
-from datetime import date
+from datetime import date, datetime, timedelta
+
+from app.dao.schedule_dao import ScheduleDao
 
 
-class Util:
+class Common:
     @staticmethod
     def convert_secs_to_human_format(seconds, short=False):
         input_seconds = seconds
@@ -50,3 +52,26 @@ class Util:
             human_date = f"On {day}"
 
         return human_date
+
+    @staticmethod
+    def calculate_next_schedule_and_duration(conn, now):
+        schedule_dao = ScheduleDao()
+        schedule_objs = schedule_dao.select(conn)
+        today_str = now.strftime('%d-%m-%Y')
+
+        schedules = [(datetime.strptime(f'{today_str} {x.schedule_time}', '%d-%m-%Y %H:%M'), x.duration) for x in
+                     schedule_objs]
+
+        sorted_schedules = sorted(schedules, key=lambda tup: tup[0])
+
+        sorted_schedules.append((sorted_schedules[0][0] + timedelta(days=1), sorted_schedules[0][1]))
+
+        next_schedule = now
+
+        for counter in range(len(sorted_schedules)):
+            if sorted_schedules[counter][0] > now:
+                next_schedule = sorted_schedules[counter][0]
+                next_duration = sorted_schedules[counter][1]
+                break
+
+        return next_schedule, next_duration

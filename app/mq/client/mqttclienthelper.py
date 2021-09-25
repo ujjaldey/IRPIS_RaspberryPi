@@ -60,7 +60,7 @@ class MqttClientHelper:
                 if not resp_success:
                     message = 'Error while getting the status'
                 else:
-                    duration_str = f' for {self.util.convert_secs_to_human_format(int(resp_duration))}' \
+                    duration_str = f' for {self.common.convert_secs_to_human_format(int(resp_duration))}' \
                         if resp_status == STATUS_ON else ''
                     message = f'{resp_message}! Currently the payload is {resp_status.lower()}{duration_str}.'
 

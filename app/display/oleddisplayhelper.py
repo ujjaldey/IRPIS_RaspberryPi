@@ -83,7 +83,7 @@ class OledDisplayHelper:
                 if display_page == OledDisplayEnum.ACTIVE:
                     draw.text((1, 14), text='Active:', font=font_row_1, fill='white')
                     self._center_text(draw, 128, 26,
-                                      text=self.util.convert_secs_to_human_format(
+                                      text=self.common.convert_secs_to_human_format(
                                           self.active_end_sec - int(time.time()), True),
                                       font=font_row_2, fill='white')
                     self._center_text(draw, 128, 41, text='remaining', font=font_row_3,
@@ -99,19 +99,19 @@ class OledDisplayHelper:
                     draw.text((1, 14), text='Next Schedule:', font=font_row_1, fill='white')
                     self._center_text(draw, 128, 26, text=self.next_schedule.strftime('%H:%M'), font=font_row_2,
                                       fill='white')
-                    self._center_text(draw, 128, 41, text=self.util.convert_date_to_human_format(self.next_schedule),
+                    self._center_text(draw, 128, 41, text=self.common.convert_date_to_human_format(self.next_schedule),
                                       font=font_row_3, fill='white')
                     self._center_text(draw, 128, 53,
-                                      text=self.util.convert_secs_to_human_format(self.next_duration, True),
+                                      text=self.common.convert_secs_to_human_format(self.next_duration, True),
                                       font=font_row_4, fill='white')
                 elif display_page == OledDisplayEnum.LAST_RUN:
                     draw.text((1, 14), text=f'Last Run ({self.last_execution_type}):', font=font_row_1, fill='white')
                     self._center_text(draw, 128, 26, text=self.last_execution.strftime('%H:%M'), font=font_row_2,
                                       fill='white')
-                    self._center_text(draw, 128, 41, text=self.util.convert_date_to_human_format(self.last_execution),
+                    self._center_text(draw, 128, 41, text=self.common.convert_date_to_human_format(self.last_execution),
                                       font=font_row_3, fill='white')
                     self._center_text(draw, 128, 53,
-                                      text=f'{self.util.convert_secs_to_human_format(self.last_duration, True)} ',
+                                      text=f'{self.common.convert_secs_to_human_format(self.last_duration, True)} ',
                                       font=font_row_4, fill='white')
         except Exception as e:
             print(e)

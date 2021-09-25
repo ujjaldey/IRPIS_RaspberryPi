@@ -2,7 +2,7 @@ from telegram import ParseMode
 from telegram.ext import Defaults, Updater, CommandHandler
 
 from app.bot.telegrambothelper import TelegramBotHelper
-from app.util.common import Util
+from app.util.common import Common
 
 
 class TelegramBot(TelegramBotHelper):
@@ -15,7 +15,7 @@ class TelegramBot(TelegramBotHelper):
         self.mqtt_client = None
         self.display = None
 
-        self.util = Util()
+        self.common = Common()
 
         defaults = Defaults(parse_mode=ParseMode.HTML)
         self.updater = Updater(token=config.get_telegram_api_key(), use_context=True, defaults=defaults,
@@ -38,6 +38,7 @@ class TelegramBot(TelegramBotHelper):
         self.dp.add_handler(CommandHandler('off', self._off))
         self.dp.add_handler(CommandHandler('next', self._next))
         self.dp.add_handler(CommandHandler('last', self._last))
+        self.dp.add_handler(CommandHandler('skip', self._skip))
 
     def start(self):
         self.updater.start_polling()
