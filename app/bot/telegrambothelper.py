@@ -114,6 +114,24 @@ class TelegramBotHelper:
                        f'{new_schedule_time} for {self.common.convert_secs_to_human_format(next_duration)}'
         context.bot.send_message(chat_id=self.config.get_telegram_chat_id(), text=response_msg)
 
+    def _history(self, update: Update, context: CallbackContext):
+        self.logger.info('_history is called')
+
+        num_of_rows = self.config.get_history_command_num_rows()
+        execution_dao = ExecutionDao()
+        executions = execution_dao.select(self.conn, num_of_rows)
+
+        log_str = ""
+        for execution in executions:
+            execution_time = execution.executed_at.strftime('%H:%M')
+            log_str += f'\n{self.common.convert_date_to_human_format(execution.executed_at)} at {execution_time} | ' + \
+                       f'{self.common.convert_secs_to_human_format(execution.duration, True)} | ' + \
+                       f'{execution.type.capitalize()} | {execution.status.capitalize()}'
+
+        # TODO convert to table
+        response_msg = f'Last {str(num_of_rows)} executions: ' + log_str
+        context.bot.send_message(chat_id=self.config.get_telegram_chat_id(), text=response_msg)
+
     def _send_response(self, message):
         self.updater.bot.send_message(chat_id=self.config.get_telegram_chat_id(), text=message)
 

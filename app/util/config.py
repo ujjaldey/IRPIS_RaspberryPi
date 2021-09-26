@@ -49,3 +49,6 @@ class Config:
 
     def get_database_file(self):
         return self.config['DATABASE_FILE']
+
+    def get_history_command_num_rows(self):
+        return int(self.config['HISTORY_COMMAND_NUM_ROWS'])

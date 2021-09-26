@@ -39,6 +39,7 @@ class TelegramBot(TelegramBotHelper):
         self.dp.add_handler(CommandHandler('next', self._next))
         self.dp.add_handler(CommandHandler('last', self._last))
         self.dp.add_handler(CommandHandler('skip', self._skip))
+        self.dp.add_handler(CommandHandler('history', self._history))
 
     def start(self):
         self.updater.start_polling()

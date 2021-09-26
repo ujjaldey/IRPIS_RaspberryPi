@@ -19,6 +19,26 @@ class ExecutionDao:
             Column("updated_at", String, nullable=True, default=datetime.now)
         )
 
+    def select(self, conn, num_of_rows):
+        try:
+            stmt = select(
+                [self.table.c.id, self.table.c.executed_at, self.table.c.duration, self.table.c.type,
+                 self.table.c.status, self.table.c.error, self.table.c.created_at, self.table.c.updated_at]) \
+                .order_by(self.table.c.executed_at.desc()) \
+                .limit(num_of_rows)
+
+            out_cur = conn.execute(stmt)
+
+            executions = []
+
+            for rec in out_cur:
+                executions.append(self.__parse_cols(rec))
+
+            return executions
+        except Exception as ex:
+            print(ex)
+            # self.logger.fatal("Exception in __start_mqtt_telegrambot: " + str(ex), exc_info=True)
+
     def select_latest(self, conn):
         try:
             stmt = select(
@@ -30,15 +50,7 @@ class ExecutionDao:
             out_cur = conn.execute(stmt)
             rec = out_cur.fetchone()
 
-            last_execution = None if not rec['id'] else Execution(
-                id=int(rec['id']),
-                executed_at=datetime.strptime(rec['executed_at'], '%Y-%m-%d %H:%M:%S'),
-                duration=int(rec['duration']),
-                type=rec['type'],
-                status=rec['status'],
-                error=rec['error'],
-                created_at=datetime.strptime(rec['created_at'], '%Y-%m-%d %H:%M:%S'),
-                updated_at=datetime.strptime(rec['updated_at'], '%Y-%m-%d %H:%M:%S'))
+            last_execution = None if not rec['id'] else self.__parse_cols(rec)
 
             return last_execution
         except Exception as ex:
@@ -63,3 +75,15 @@ class ExecutionDao:
 
         ret = conn.execute(stmt)
         return True, ret.lastrowid
+
+    @staticmethod
+    def __parse_cols(rec):
+        return Execution(
+            id=int(rec['id']),
+            executed_at=datetime.strptime(rec['executed_at'], '%Y-%m-%d %H:%M:%S'),
+            duration=int(rec['duration']),
+            type=rec['type'],
+            status=rec['status'],
+            error=rec['error'],
+            created_at=datetime.strptime(rec['created_at'], '%Y-%m-%d %H:%M:%S'),
+            updated_at=datetime.strptime(rec['updated_at'], '%Y-%m-%d %H:%M:%S'))
