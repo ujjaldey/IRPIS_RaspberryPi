@@ -11,5 +11,5 @@ class IrpisMainHelper:
         command = ['ping', '-c', '1', PING_URL]
         return subprocess.call(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL) == 0
 
-    def _calculate_next_schedule_and_duration(self, conn, now):
-        return self.common.calculate_next_schedule_and_duration(conn, now)
+    def _calculate_next_schedule_and_duration(self, conn, curr_schedule):
+        return self.common.calculate_next_schedule_and_duration(conn, curr_schedule)

@@ -45,16 +45,23 @@ class IrpisMain(IrpisMainHelper):
 
             self.display.set_last_execution(execution)
 
-            if datetime.now() >= next_schedule:
-                self.mqtt_client.turn_on_payload(duration, 'SCHEDULED')
+            if next_schedule:
+                if datetime.now() >= next_schedule:
+                    self.mqtt_client.turn_on_payload(duration, 'SCHEDULED')
 
-                now = datetime.now().replace(microsecond=0)
-                next_schedule, next_duration = self._calculate_next_schedule_and_duration(self.conn, now)
-
-                schedule = NextSchedule(
-                    next_schedule_at=next_schedule, duration=next_duration,
-                    created_at=datetime.now().replace(microsecond=0),
-                    updated_at=datetime.now().replace(microsecond=0))
-                success = next_schedule_dao.upsert(self.conn, schedule)
+                    self.__upsert_next_schedule(next_schedule_dao)
+            else:
+                self.__upsert_next_schedule(next_schedule_dao)
 
             sleep(1)
+
+    def __upsert_next_schedule(self, next_schedule_dao):
+        now = datetime.now().replace(microsecond=0)
+        next_schedule, next_duration = self._calculate_next_schedule_and_duration(self.conn, now)
+
+        schedule = NextSchedule(
+            next_schedule_at=next_schedule, duration=next_duration,
+            created_at=datetime.now().replace(microsecond=0),
+            updated_at=datetime.now().replace(microsecond=0))
+
+        return next_schedule_dao.upsert(self.conn, schedule)

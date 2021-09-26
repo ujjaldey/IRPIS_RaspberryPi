@@ -97,22 +97,48 @@ class OledDisplayHelper:
                     self._center_text(draw, 128, 53, text=now.strftime('(%A)'), font=font_row_4, fill='white')
                 elif display_page == OledDisplayEnum.NEXT_SCHEDULE:
                     draw.text((1, 14), text='Next Schedule:', font=font_row_1, fill='white')
-                    self._center_text(draw, 128, 26, text=self.next_schedule.strftime('%H:%M'), font=font_row_2,
-                                      fill='white')
-                    self._center_text(draw, 128, 41, text=self.common.convert_date_to_human_format(self.next_schedule),
-                                      font=font_row_3, fill='white')
-                    self._center_text(draw, 128, 53,
-                                      text=self.common.convert_secs_to_human_format(self.next_duration, True),
-                                      font=font_row_4, fill='white')
+
+                    if self.next_schedule:
+                        self._center_text(draw, 128, 26, text=self.next_schedule.strftime('%H:%M'), font=font_row_2,
+                                          fill='white')
+                        self._center_text(draw, 128, 41,
+                                          text=self.common.convert_date_to_human_format(self.next_schedule),
+                                          font=font_row_3, fill='white')
+                        self._center_text(draw, 128, 53,
+                                          text=self.common.convert_secs_to_human_format(self.next_duration, True),
+                                          font=font_row_4, fill='white')
+                    else:
+                        self._center_text(draw, 128, 26, text='No', font=font_row_2,
+                                          fill='white')
+                        self._center_text(draw, 128, 41,
+                                          text='Next',
+                                          font=font_row_3, fill='white')
+                        self._center_text(draw, 128, 53,
+                                          text='Schedule',
+                                          font=font_row_4, fill='white')
+
                 elif display_page == OledDisplayEnum.LAST_RUN:
-                    draw.text((1, 14), text=f'Last Run ({self.last_execution_type}):', font=font_row_1, fill='white')
-                    self._center_text(draw, 128, 26, text=self.last_execution.strftime('%H:%M'), font=font_row_2,
-                                      fill='white')
-                    self._center_text(draw, 128, 41, text=self.common.convert_date_to_human_format(self.last_execution),
-                                      font=font_row_3, fill='white')
-                    self._center_text(draw, 128, 53,
-                                      text=f'{self.common.convert_secs_to_human_format(self.last_duration, True)} ',
-                                      font=font_row_4, fill='white')
+                    execution_type_str = f' ({self.last_execution_type})' if self.last_execution_type else ''
+                    draw.text((1, 14), text=f'Last Run{execution_type_str}:', font=font_row_1, fill='white')
+
+                    if self.last_execution_type:
+                        self._center_text(draw, 128, 26, text=self.last_execution.strftime('%H:%M'), font=font_row_2,
+                                          fill='white')
+                        self._center_text(draw, 128, 41,
+                                          text=self.common.convert_date_to_human_format(self.last_execution),
+                                          font=font_row_3, fill='white')
+                        self._center_text(draw, 128, 53,
+                                          text=f'{self.common.convert_secs_to_human_format(self.last_duration, True)} ',
+                                          font=font_row_4, fill='white')
+                    else:
+                        self._center_text(draw, 128, 26, text='No', font=font_row_2,
+                                          fill='white')
+                        self._center_text(draw, 128, 41,
+                                          text='Previous',
+                                          font=font_row_3, fill='white')
+                        self._center_text(draw, 128, 53,
+                                          text='Executions',
+                                          font=font_row_4, fill='white')
         except Exception as e:
             print(e)
 

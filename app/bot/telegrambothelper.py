@@ -121,15 +121,20 @@ class TelegramBotHelper:
         execution_dao = ExecutionDao()
         executions = execution_dao.select(self.conn, num_of_rows)
 
-        log_str = ""
-        for execution in executions:
-            execution_time = execution.executed_at.strftime('%H:%M')
-            log_str += f'\n{self.common.convert_date_to_human_format(execution.executed_at)} at {execution_time} | ' + \
-                       f'{self.common.convert_secs_to_human_format(execution.duration, True)} | ' + \
-                       f'{execution.type.capitalize()} | {execution.status.capitalize()}'
+        if len(executions) > 0:
+            log_str = ""
+            for execution in executions:
+                execution_time = execution.executed_at.strftime('%H:%M')
+                log_str += f'\n{self.common.convert_date_to_human_format(execution.executed_at)} at {execution_time} | ' + \
+                           f'{self.common.convert_secs_to_human_format(execution.duration, True)} | ' + \
+                           f'{execution.type.capitalize()} | {execution.status.capitalize()}'
+
+            response_msg = f'Last {str(num_of_rows)} executions: ' + log_str
+        else:
+            response_msg = 'No previous executions'
 
         # TODO convert to table
-        response_msg = f'Last {str(num_of_rows)} executions: ' + log_str
+
         context.bot.send_message(chat_id=self.config.get_telegram_chat_id(), text=response_msg)
 
     def _send_response(self, message):

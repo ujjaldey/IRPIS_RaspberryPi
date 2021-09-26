@@ -54,24 +54,29 @@ class Common:
         return human_date
 
     @staticmethod
-    def calculate_next_schedule_and_duration(conn, now):
+    def calculate_next_schedule_and_duration(conn, curr_schedule):
         schedule_dao = ScheduleDao()
         schedule_objs = schedule_dao.select(conn)
-        today_str = now.strftime('%d-%m-%Y')
+        today_str = curr_schedule.strftime('%d-%m-%Y')
 
         schedules = [(datetime.strptime(f'{today_str} {x.schedule_time}', '%d-%m-%Y %H:%M'), x.duration) for x in
                      schedule_objs]
 
         sorted_schedules = sorted(schedules, key=lambda tup: tup[0])
 
-        sorted_schedules.append((sorted_schedules[0][0] + timedelta(days=1), sorted_schedules[0][1]))
+        if len(sorted_schedules) > 0:
+            sorted_schedules.append((sorted_schedules[0][0] + timedelta(days=1), sorted_schedules[0][1]))
 
-        next_schedule = now
+            next_schedule = curr_schedule
 
-        for counter in range(len(sorted_schedules)):
-            if sorted_schedules[counter][0] > now:
-                next_schedule = sorted_schedules[counter][0]
-                next_duration = sorted_schedules[counter][1]
-                break
+            for counter in range(len(sorted_schedules)):
+                if sorted_schedules[counter][0] > curr_schedule:
+                    next_schedule = sorted_schedules[counter][0]
+                    next_duration = sorted_schedules[counter][1]
+                    break
+        else:
+            next_schedule = datetime.now().replace(microsecond=0) + timedelta(days=1)
+            # TODO the default duration if not schedule to be parameterized
+            next_duration = 60
 
         return next_schedule, next_duration

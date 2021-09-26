@@ -24,11 +24,7 @@ class NextScheduleDao:
             out_cur = conn.execute(stmt)
             rec = out_cur.fetchone()
 
-            schedule = None if not rec['next_schedule_at'] else NextSchedule(
-                next_schedule_at=datetime.strptime(rec['next_schedule_at'], '%Y-%m-%d %H:%M:%S'),
-                duration=int(rec['duration']),
-                created_at=datetime.strptime(rec['created_at'], '%Y-%m-%d %H:%M:%S'),
-                updated_at=datetime.strptime(rec['updated_at'], '%Y-%m-%d %H:%M:%S'))
+            schedule = self.__parse_cols(rec)
 
             return schedule
         except Exception as ex:
@@ -59,3 +55,18 @@ class NextScheduleDao:
             print(ex)
             # self.logger.fatal("Exception in __start_mqtt_telegrambot: " + str(ex), exc_info=True)
             return False
+
+    @staticmethod
+    def __parse_cols(rec=None):
+        if rec:
+            return NextSchedule(
+                next_schedule_at=datetime.strptime(rec['next_schedule_at'], '%Y-%m-%d %H:%M:%S'),
+                duration=int(rec['duration']),
+                created_at=datetime.strptime(rec['created_at'], '%Y-%m-%d %H:%M:%S'),
+                updated_at=datetime.strptime(rec['updated_at'], '%Y-%m-%d %H:%M:%S'))
+        else:
+            return NextSchedule(
+                next_schedule_at=None,
+                duration=0,
+                created_at=None,
+                updated_at=None)

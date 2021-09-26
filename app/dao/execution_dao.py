@@ -50,7 +50,7 @@ class ExecutionDao:
             out_cur = conn.execute(stmt)
             rec = out_cur.fetchone()
 
-            last_execution = None if not rec['id'] else self.__parse_cols(rec)
+            last_execution = self.__parse_cols(rec)
 
             return last_execution
         except Exception as ex:
@@ -77,13 +77,24 @@ class ExecutionDao:
         return True, ret.lastrowid
 
     @staticmethod
-    def __parse_cols(rec):
-        return Execution(
-            id=int(rec['id']),
-            executed_at=datetime.strptime(rec['executed_at'], '%Y-%m-%d %H:%M:%S'),
-            duration=int(rec['duration']),
-            type=rec['type'],
-            status=rec['status'],
-            error=rec['error'],
-            created_at=datetime.strptime(rec['created_at'], '%Y-%m-%d %H:%M:%S'),
-            updated_at=datetime.strptime(rec['updated_at'], '%Y-%m-%d %H:%M:%S'))
+    def __parse_cols(rec=None):
+        if rec:
+            return Execution(
+                id=int(rec['id']),
+                executed_at=datetime.strptime(rec['executed_at'], '%Y-%m-%d %H:%M:%S'),
+                duration=int(rec['duration']),
+                type=rec['type'],
+                status=rec['status'],
+                error=rec['error'],
+                created_at=datetime.strptime(rec['created_at'], '%Y-%m-%d %H:%M:%S'),
+                updated_at=datetime.strptime(rec['updated_at'], '%Y-%m-%d %H:%M:%S'))
+        else:
+            return Execution(
+                id=0,
+                executed_at=None,
+                duration=0,
+                type='',
+                status='',
+                error='',
+                created_at=None,
+                updated_at=None)
