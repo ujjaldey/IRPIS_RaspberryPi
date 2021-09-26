@@ -1,8 +1,9 @@
 import re
 from datetime import datetime
+from time import sleep
 
 from dateutil import parser
-from telegram import Update
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CallbackContext
 
 from app.dao.execution_dao import ExecutionDao
@@ -136,6 +137,63 @@ class TelegramBotHelper:
         # TODO convert to table
 
         context.bot.send_message(chat_id=self.config.get_telegram_chat_id(), text=response_msg)
+
+    def _reboot(self, update: Update, context: CallbackContext):
+        self.logger.info('_reboot is called')
+
+        query = update.callback_query
+        query.answer()
+
+        if query.data == 'reboot_Y':
+            response_msg = 'Ok. Rebooting in 5 seconds...'
+            query.edit_message_text(text=response_msg)
+            sleep(5)
+            self.common.reboot()
+        else:
+            response_msg = 'Ok. Command cancelled!'
+            query.edit_message_text(text=response_msg)
+
+    def _shutdown(self, update: Update, context: CallbackContext):
+        self.logger.info('_shutdown is called')
+
+        query = update.callback_query
+        query.answer()
+
+        if query.data == 'shutdown_Y':
+            response_msg = 'Ok. Shutting down in 5 seconds...'
+            query.edit_message_text(text=response_msg)
+            sleep(5)
+            self.common.shutdown()
+        else:
+            response_msg = 'Ok. Command cancelled!'
+            query.edit_message_text(text=response_msg)
+
+    @staticmethod
+    def _reboot_confirm(update: Update, context: CallbackContext):
+        keyboard = [
+            [
+                InlineKeyboardButton("Yes", callback_data='reboot_Y'),
+                InlineKeyboardButton("No", callback_data='reboot_N'),
+            ],
+        ]
+
+        reply_markup = InlineKeyboardMarkup(keyboard)
+
+        update.message.reply_text('This command will reboot the Raspberry Pi. Are you sure?', reply_markup=reply_markup)
+
+    @staticmethod
+    def _shutdown_confirm(update: Update, context: CallbackContext):
+        keyboard = [
+            [
+                InlineKeyboardButton("Yes", callback_data='shutdown_Y'),
+                InlineKeyboardButton("No", callback_data='shutdown_N'),
+            ],
+        ]
+
+        reply_markup = InlineKeyboardMarkup(keyboard)
+
+        update.message.reply_text('This command will shutdown the Raspberry Pi. Are you sure?',
+                                  reply_markup=reply_markup)
 
     def _send_response(self, message):
         self.updater.bot.send_message(chat_id=self.config.get_telegram_chat_id(), text=message)

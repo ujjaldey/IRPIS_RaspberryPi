@@ -1,5 +1,5 @@
 from telegram import ParseMode
-from telegram.ext import Defaults, Updater, CommandHandler
+from telegram.ext import Defaults, Updater, CommandHandler, CallbackQueryHandler
 
 from app.bot.telegrambothelper import TelegramBotHelper
 from app.util.common import Common
@@ -40,6 +40,10 @@ class TelegramBot(TelegramBotHelper):
         self.dp.add_handler(CommandHandler('last', self._last))
         self.dp.add_handler(CommandHandler('skip', self._skip))
         self.dp.add_handler(CommandHandler('history', self._history))
+        self.dp.add_handler(CommandHandler('reboot', self._reboot_confirm))
+        self.dp.add_handler(CallbackQueryHandler(self._reboot, pattern='^reboot_.*'))
+        self.dp.add_handler(CommandHandler('shutdown', self._shutdown_confirm))
+        self.dp.add_handler(CallbackQueryHandler(self._shutdown, pattern='^shutdown_.*'))
 
     def start(self):
         self.updater.start_polling()

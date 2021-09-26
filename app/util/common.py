@@ -1,3 +1,4 @@
+import os
 from datetime import date, datetime, timedelta
 
 from app.dao.schedule_dao import ScheduleDao
@@ -80,3 +81,11 @@ class Common:
             next_duration = 60
 
         return next_schedule, next_duration
+
+    @staticmethod
+    def reboot():
+        os.system('sudo reboot')
+
+    @staticmethod
+    def shutdown():
+        os.system('sudo shutdown now')
