@@ -66,6 +66,9 @@ class OledDisplay(OledDisplayHelper):
         display_change_counter_sec = int(time.time()) - self.config.get_display_change_duration_sec()
         self.esp8266_status_check_sec = int(time.time())
 
+        self._show_dashboard(OledDisplayEnum.BANNER)
+        time.sleep(5)
+
         while True:
             if self.active:
                 self._show_dashboard(OledDisplayEnum.ACTIVE)
