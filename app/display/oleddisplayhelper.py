@@ -92,7 +92,7 @@ class OledDisplayHelper:
                                           fill='white')
                         self._center_text(draw, 128, 53, text='(watering)', font=font_row_4, fill='white')
                     elif display_page == OledDisplayEnum.NOW:
-                        now = datetime.now()
+                        now = datetime.now().replace(microsecond=0)
                         draw.text((1, 14), text='Now:', font=font_row_1, fill='white')
                         self._center_text(draw, 128, 26, text=now.strftime('%H:%M'), font=font_row_2, fill='white')
                         self._center_text(draw, 128, 41, text=now.strftime('%d-%m-%Y'), font=font_row_3, fill='white')
@@ -146,8 +146,8 @@ class OledDisplayHelper:
                     self._center_text(draw, 128, 10, text='IRPIS', font=font_banner, fill='white')
                     self._center_text(draw, 128, 40, text='By', font=font_row_4, fill='white')
                     self._center_text(draw, 128, 53, text='Ujjal Dey', font=font_row_3, fill='white')
-        except Exception as e:
-            print(e)
+        except Exception as ex:
+            print(ex)
 
     def display_on_off(self, on_off):
         if on_off:

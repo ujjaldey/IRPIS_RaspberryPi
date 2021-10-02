@@ -8,6 +8,7 @@ from telegram.ext import CallbackContext
 
 from app.dao.execution_dao import ExecutionDao
 from app.dao.next_schedule_dao import NextScheduleDao
+from app.dao.schedule_dao import ScheduleDao
 from app.model.next_schedule import NextSchedule
 
 
@@ -136,6 +137,42 @@ class TelegramBotHelper:
             response_msg = 'No previous executions'
 
         # TODO convert to table
+
+        context.bot.send_message(chat_id=self.config.get_telegram_chat_id(), text=response_msg)
+
+    def _schedule(self, update: Update, context: CallbackContext):
+        self.logger.info('_schedule is called')
+
+        schedule_dao = ScheduleDao()
+        schedule_objs = schedule_dao.select(self.conn)
+        today = datetime.now().replace(microsecond=0)
+        today_str = today.strftime('%d-%m-%Y')
+
+        schedules = [(datetime.strptime(f'{today_str} {x.schedule_time}', '%d-%m-%Y %H:%M'), x.duration) for x in
+                     schedule_objs]
+
+        sorted_schedules = sorted(schedules, key=lambda tup: tup[0])
+
+        next_schedule_dao = NextScheduleDao()
+        next_schedule = next_schedule_dao.select(self.conn)
+        next_schedule_time = next_schedule.next_schedule_at.strftime('%H:%M')
+
+        if len(sorted_schedules) > 0:
+            schedule_str = ""
+            for schedule in sorted_schedules:
+                schedule_time = schedule[0].strftime('%H:%M')
+                schedule_str += f'\n{schedule_time} | ' + \
+                                f'{self.common.convert_secs_to_human_format(schedule[1], True)}' + \
+                                (' *' if schedule_time == next_schedule_time else '')
+
+            response_msg = f'Schedules: {schedule_str}\n\n' + \
+                           '* Next Schedule: ' + \
+                           f'{self.common.convert_date_to_human_format(next_schedule.next_schedule_at)} at ' + \
+                           f'{next_schedule_time}'
+        else:
+            response_msg = 'No schedules'
+
+            # TODO convert to table
 
         context.bot.send_message(chat_id=self.config.get_telegram_chat_id(), text=response_msg)
 

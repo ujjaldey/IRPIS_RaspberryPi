@@ -46,7 +46,7 @@ class IrpisMain(IrpisMainHelper):
             self.display.set_last_execution(execution)
 
             if next_schedule:
-                if datetime.now() >= next_schedule:
+                if datetime.now().replace(microsecond=0) >= next_schedule:
                     self.mqtt_client.turn_on_payload(duration, 'SCHEDULED')
 
                     self.__upsert_next_schedule(next_schedule_dao)
