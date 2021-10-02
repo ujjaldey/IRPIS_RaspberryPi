@@ -82,7 +82,8 @@ class OledDisplay(OledDisplayHelper):
                     if counter >= len(pages):
                         counter = 0
 
-                if int(time.time()) >= self.display_off_counter_sec + self.config.get_display_timeout_sec():
+                display_timeout = self.config.get_display_timeout_sec()
+                if display_timeout >= 0 and int(time.time()) >= self.display_off_counter_sec + display_timeout:
                     self.display_on_off(False)
 
             if int(time.time()) >= self.esp8266_status_check_sec + ESP8266_STATUS_CHECK_TIMEOUT_SEC:
