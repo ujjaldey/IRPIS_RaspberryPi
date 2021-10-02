@@ -130,7 +130,8 @@ class TelegramBotHelper:
                            f'{self.common.convert_secs_to_human_format(execution.duration, True)} | ' + \
                            f'{execution.type.capitalize()} | {execution.status.capitalize()}'
 
-            response_msg = f'Last {str(num_of_rows)} executions: ' + log_str
+            num_of_recs = len(executions) if num_of_rows >= len(executions) else num_of_rows
+            response_msg = f'Last {str(num_of_recs)} executions: ' + log_str
         else:
             response_msg = 'No previous executions'
 
