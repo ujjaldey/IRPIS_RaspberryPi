@@ -15,7 +15,7 @@ from app.model.next_schedule import NextSchedule
 class TelegramBotHelper:
     def _greet_message(self):
         self.updater.bot.send_message(chat_id=self.config.get_telegram_chat_id(),
-                                      text='<b><i>IOT Remote Plant Irrigation System (IRPIS)</i></b> initiating...')
+                                      text=self.common.greet_time() + '\n<b><i>IOT Remote Plant Irrigation System (IRPIS)</i></b> is initiating...')
 
     def _status(self, update: Update, context: CallbackContext):
         self.mqtt_client.esp8266_status()

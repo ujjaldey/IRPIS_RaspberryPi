@@ -59,7 +59,7 @@ class OledDisplayHelper:
         draw.line((116, 3, 127, 10), fill='white')
 
     def _show_dashboard(self, display_page):
-        font_banner = self._make_font(FONT_CONSOLAS, 32)
+        font_banner = self._make_font(FONT_CONSOLAS, 24)
         font_header = self._make_font(FONT_CONSOLAS, 12)
         font_icon_1 = self._make_font(FONT_FONTAWESOME, 10)
         font_icon_2 = self._make_font(FONT_FONTAWESOME, 12)
@@ -67,6 +67,7 @@ class OledDisplayHelper:
         font_row_2 = self._make_font(FONT_CONSOLAS, 15)
         font_row_3 = self._make_font(FONT_CONSOLAS, 12)
         font_row_4 = self._make_font(FONT_CONSOLAS, 10)
+        font_row_5 = self._make_font(FONT_CONSOLAS, 9)
 
         try:
             with canvas(self.device) as draw:
@@ -143,9 +144,12 @@ class OledDisplayHelper:
                                               text='Executions',
                                               font=font_row_4, fill='white')
                 else:
-                    self._center_text(draw, 128, 10, text='IRPIS', font=font_banner, fill='white')
-                    self._center_text(draw, 128, 40, text='By', font=font_row_4, fill='white')
-                    self._center_text(draw, 128, 53, text='Ujjal Dey', font=font_row_3, fill='white')
+                    self._center_text(draw, 128, 2, text='IRPIS', font=font_banner, fill='white')
+                    draw.line((30, 24, 98, 24), fill='white')
+                    self._center_text(draw, 128, 27, text='IOT Remote', font=font_row_5, fill='white')
+                    self._center_text(draw, 128, 37, text='Plant Irrigation System', font=font_row_5, fill='white')
+                    draw.line((5, 48, 123, 48), fill='white')
+                    self._center_text(draw, 128, 53, text=self.common.greet_time(), font=font_row_3, fill='white')
         except Exception as ex:
             print(ex)
 

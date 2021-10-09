@@ -7,6 +7,19 @@ from app.dao.schedule_dao import ScheduleDao
 
 class Common:
     @staticmethod
+    def greet_time():
+        now = datetime.now().replace(microsecond=0)
+
+        if now.hour < 12:
+            time_str = "Morning"
+        elif 12 <= now.hour < 18:
+            time_str = "Afternoon"
+        else:
+            time_str = "Evening"
+
+        return "Good " + time_str + "!"
+
+    @staticmethod
     def convert_secs_to_human_format(seconds, short=False):
         input_seconds = seconds
         day_str = 'day' if seconds < 3600 else 'd'
