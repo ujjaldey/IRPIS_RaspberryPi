@@ -1,5 +1,5 @@
 from threading import Thread
-from time import sleep
+from time import sleep, time
 
 from app.bot.telegrambot import TelegramBot
 from app.display.oleddisplay import OledDisplay
@@ -18,8 +18,10 @@ class Main:
         self.config = Config()
         self.db = SqliteDb(self.config)
 
+        app_start_time = time()
+
         self.mqtt_client = MqttClient(self.logger, self.config, self.db)
-        self.telegram_bot = TelegramBot(self.logger, self.config, self.db)
+        self.telegram_bot = TelegramBot(self.logger, self.config, self.db, app_start_time)
         self.telegram_bot.add_handlers()
         self.display = OledDisplay(self.logger, self.config)
         self.irpis = IrpisMain(self.logger, self.config, self.db)

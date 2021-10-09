@@ -21,7 +21,7 @@ class MqttClientHelper:
         msg_str = str(msg.payload.decode('utf-8'))
         self.logger.info(f'Received topic {msg.topic} with message: {msg_str}')
 
-        telegram_bot = TelegramBot(self.logger, self.config, self.db)
+        telegram_bot = TelegramBot(self.logger, self.config, self.db, 0)
 
         resp_sender, resp_success, resp_type, resp_status, resp_duration, resp_execution_id, resp_message = \
             self.__parse_response(msg_str)
@@ -64,14 +64,8 @@ class MqttClientHelper:
             elif resp_type == TYPE_ALIVE:
                 self.display.set_esp8266_online(True)
             elif resp_type == TYPE_STATUS:
-                if not resp_success:
-                    message = 'Error while getting the status'
-                else:
-                    duration_str = f' for {self.common.convert_secs_to_human_format(int(resp_duration))}' \
-                        if resp_status == STATUS_ON else ''
-                    message = f'{resp_message}! Currently the payload is {resp_status.lower()}{duration_str}.'
-
-                telegram_bot.send_response(message)
+                response = {'success': bool(resp_success), 'status': resp_status, 'duration': int(resp_duration)}
+                self.set_esp8266_response(response)
         else:
             message = 'Invalid response'
             telegram_bot.send_response(message)

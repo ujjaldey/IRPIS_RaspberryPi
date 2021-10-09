@@ -20,6 +20,15 @@ class MqttClient(MqttClientHelper):
 
         self.common = Common()
 
+        self.__esp8266_response = None
+
+    def set_esp8266_response(self, esp8266_response):
+        print("setting---", esp8266_response)
+        self.__esp8266_response = esp8266_response
+
+    def get_esp8266_response(self):
+        return self.__esp8266_response
+
     def connect(self):
         self.mqtt_client = self.mqtt_broker.connect()
 

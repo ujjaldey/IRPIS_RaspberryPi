@@ -1,6 +1,6 @@
 import re
 from datetime import datetime
-from time import sleep
+from time import sleep, time
 
 from dateutil import parser
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
@@ -19,6 +19,58 @@ class TelegramBotHelper:
 
     def _status(self, update: Update, context: CallbackContext):
         self.mqtt_client.esp8266_status()
+
+        app_uptime = time() - self.app_start_time
+        app_uptime_msg = f'The application is up for {self.common.convert_secs_to_human_format(app_uptime)}'
+
+        for i in range(1, 10):
+            response = self.mqtt_client.get_esp8266_response()
+            self.mqtt_client.set_esp8266_response(None)
+            if response:
+                break
+            sleep(0.5)
+
+        if response:
+            if response['success']:
+                esp8266_response_msg = 'ESP8266 is up and running'
+                status = response['status']
+                duration = response['duration']
+                duration_str = f' for {self.common.convert_secs_to_human_format(duration)}' \
+                    if status == 'ON' else ''  # TODO reuse enum
+                payload_msg = f'Currently the payload is {status.lower()}{duration_str}.'
+            else:
+                esp8266_response_msg = 'ESP8266 is having some issues'
+                payload_msg = ''
+        else:
+            esp8266_response_msg = 'ESP8266 is either down or not accessible'
+
+        internet_status = self.common.is_internet_connected()
+        internet_response_msg = 'Internet is ' + ('connected' if internet_status else 'not connected')
+
+        execution_dao = ExecutionDao()
+        execution = execution_dao.select_latest(self.conn)
+        last_execution_at = self.common.convert_date_to_human_format(
+            execution.executed_at) + ' at ' + execution.executed_at.strftime('%H:%M')
+        last_execution_msg = f'Last execution: {last_execution_at} for ' \
+                             f'{self.common.convert_secs_to_human_format(execution.duration, True)} ' \
+                             f'({execution.type.capitalize()})'
+
+        next_schedule_dao = NextScheduleDao()
+        schedule = next_schedule_dao.select(self.conn)
+
+        next_schedule, duration = (schedule.next_schedule_at, schedule.duration) if schedule else (None, 0)
+        next_schedule_at = self.common.convert_date_to_human_format(next_schedule) + ' at ' + next_schedule.strftime(
+            '%H:%M')
+        if next_schedule:
+            next_schedule_msg = f'Next schedule: {next_schedule_at} for ' \
+                                f'{self.common.convert_secs_to_human_format(duration, True)}'
+        else:
+            next_schedule_msg = ''
+
+        response_msg = f'Status:\n{app_uptime_msg}\n{esp8266_response_msg}\n{internet_response_msg}' \
+                       f'\n{payload_msg}\n{last_execution_msg}\n{next_schedule_msg}'
+        context.bot.send_message(chat_id=self.config.get_telegram_chat_id(), text=response_msg)
+        self.display.display_on_off(True)
 
     def _wakeup(self, update: Update, context: CallbackContext):
         response_msg = 'OK. Turning on the display...'

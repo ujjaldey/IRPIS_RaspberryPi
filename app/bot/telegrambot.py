@@ -1,3 +1,5 @@
+from time import time
+
 from telegram import ParseMode
 from telegram.ext import Defaults, Updater, CommandHandler, CallbackQueryHandler
 
@@ -6,10 +8,11 @@ from app.util.common import Common
 
 
 class TelegramBot(TelegramBotHelper):
-    def __init__(self, logger, config, db):
+    def __init__(self, logger, config, db, app_start_time):
         self.logger = logger
         self.config = config
         self.db = db
+        self.app_start_time = app_start_time if app_start_time > 0 else time()
         self.conn = db.connect().execution_options(autocommit=True)
 
         self.mqtt_client = None
