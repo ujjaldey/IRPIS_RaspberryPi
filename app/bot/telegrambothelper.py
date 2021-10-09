@@ -179,9 +179,12 @@ class TelegramBotHelper:
             log_str = ""
             for execution in executions:
                 execution_time = execution.executed_at.strftime('%H:%M')
-                log_str += f'\n{self.common.convert_date_to_human_format(execution.executed_at)} at {execution_time} | ' + \
+                status_and_error = execution.status.capitalize() + \
+                                   (f' ({execution.error})' if execution.status == 'FAILED' else '')
+                log_str += f'\n{self.common.convert_date_to_human_format(execution.executed_at)} at ' + \
+                           f'{execution_time} | ' + \
                            f'{self.common.convert_secs_to_human_format(execution.duration, True)} | ' + \
-                           f'{execution.type.capitalize()} | {execution.status.capitalize()}'
+                           f'{execution.type.capitalize()} | {status_and_error}'
 
             num_of_recs = len(executions) if num_of_rows >= len(executions) else num_of_rows
             response_msg = f'Last {str(num_of_recs)} executions: ' + log_str
