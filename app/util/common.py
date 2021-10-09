@@ -1,4 +1,5 @@
 import os
+import subprocess
 from datetime import date, datetime, timedelta
 
 from app.dao.schedule_dao import ScheduleDao
@@ -81,6 +82,14 @@ class Common:
             next_duration = 60
 
         return next_schedule, next_duration
+
+    @staticmethod
+    def is_internet_connected():
+        # TODO configuration in .env
+
+        ping_url = '1.1.1.1'
+        command = ['ping', '-c', '1', ping_url]
+        return subprocess.call(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL) == 0
 
     @staticmethod
     def reboot():

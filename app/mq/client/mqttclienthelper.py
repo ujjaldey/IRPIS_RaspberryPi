@@ -31,7 +31,14 @@ class MqttClientHelper:
             if resp_type == TYPE_COMMAND:
                 success_str = '' if resp_success else 'could not be '
                 status_str = resp_status
-                message = f'Irrigation {success_str}turned {status_str.lower()}!'
+
+                if status_str == STATUS_ON:
+                    status_str_with_duration = f'{status_str.lower()} for ' \
+                                               f'{self.common.convert_secs_to_human_format(int(resp_duration))}'
+                else:
+                    status_str_with_duration = status_str.lower()
+
+                message = f'Irrigation {success_str}turned {status_str_with_duration}!'
 
                 duration = int(resp_duration)
 
@@ -72,7 +79,7 @@ class MqttClientHelper:
 
     def esp8266_status(self):
         self.mqtt_client.publish(self.config.get_mqtt_command_topic(),
-                                 self.build_mqtt_payload('STATUS'))
+                                 self.build_mqtt_payload('STATUS'))  # TODO use enum
         self.display.display_on_off(True)
 
     def turn_on_payload(self, duration, trigger_type):
