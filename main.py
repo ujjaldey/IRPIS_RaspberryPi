@@ -1,5 +1,8 @@
+import subprocess
 from threading import Thread
 from time import sleep, time
+
+from RPi import GPIO
 
 from app.bot.telegrambot import TelegramBot
 from app.display.oleddisplay import OledDisplay
@@ -31,6 +34,21 @@ class Main:
                            self.__start_display_main,
                            self.__start_irpis_main]
         self.threads = []
+
+    def is_process_already_running(self):
+        command = 'ps -ef | grep main.py'
+        result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        processes = result.stdout.decode("utf-8").split("\n")
+        process_count = 0
+
+        for process in processes:
+            if 'python' in process:
+                process_count += 1
+        if process_count > 1:
+            self.logger.error('Another instance is already running')
+            return True
+        else:
+            return False
 
     def start(self):
         self.logger.info('Starting IRPIS_RaspberryPi')
@@ -92,9 +110,13 @@ class Main:
 
 
 if __name__ == '__main__':
+    GPIO.setwarnings(False)
     main = Main()
 
     try:
-        main.start()
+        if not main.is_process_already_running():
+            main.start()
     except (KeyboardInterrupt, SystemExit):
         main.terminate()
+    finally:
+        pass
