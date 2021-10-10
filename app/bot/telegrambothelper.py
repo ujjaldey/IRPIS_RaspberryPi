@@ -109,7 +109,7 @@ class TelegramBotHelper:
         context.bot.send_message(chat_id=self.config.get_telegram_chat_id(), text=response_msg)
 
         if success:
-            self.mqtt_client.turn_on_payload(duration, 'MANUAL')
+            self.mqtt_client.turn_on_payload(duration, MqttClientEnum.TRIGGER_MANUAL.value)
 
     def _off(self, update: Update, context: CallbackContext):
         self.logger.info('_off is called')

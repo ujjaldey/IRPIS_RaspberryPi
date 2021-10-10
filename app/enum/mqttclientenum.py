@@ -7,3 +7,5 @@ class MqttClientEnum(Enum):
     TYPE_STATUS = 'STATUS'
     STATUS_ON = 'ON'
     STATUS_OFF = 'OFF'
+    TRIGGER_MANUAL = 'MANUAL'
+    TRIGGER_SCHEDULED = 'SCHEDULED'
