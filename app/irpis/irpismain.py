@@ -1,9 +1,10 @@
 import datetime
 from datetime import datetime
-from time import sleep
+from time import sleep, time
 
 from app.dao.execution_dao import ExecutionDao
 from app.dao.next_schedule_dao import NextScheduleDao
+from app.enum.irpisenum import IrpisEnum
 from app.irpis.irpismainhelper import IrpisMainHelper
 from app.model.next_schedule import NextSchedule
 from app.util.common import Common
@@ -28,17 +29,19 @@ class IrpisMain(IrpisMainHelper):
         self.mqtt_client = mqtt_client
 
     def start(self):
+        check_internet_counter_sec = 0
+
         while True:
-            self.logger.info("Calling IRPIS main")
-            # TODO should be checked at certain interval only
-            self.display.set_wifi_online(self._is_internet_connected())
+            self.logger.info(f'Calling {IrpisEnum.APPLICATION_NAME.value} main')
+            if int(time()) >= check_internet_counter_sec + IrpisEnum.CHECK_INTERNET_INTERVAL_SEC.value:
+                self.display.set_wifi_online(self._is_internet_connected())
+                check_internet_counter_sec = int(time())
 
             next_schedule_dao = NextScheduleDao()
             schedule = next_schedule_dao.select(self.conn)
 
+            self.display.set_next_schedule(schedule)
             next_schedule, duration = (schedule.next_schedule_at, schedule.duration) if schedule else (None, 0)
-            # @TODO pass schedule as param, like execution below
-            self.display.set_next_schedule(next_schedule, duration)
 
             execution_dao = ExecutionDao()
             execution = execution_dao.select_latest(self.conn)

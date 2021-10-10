@@ -1,0 +1,26 @@
+from enum import Enum
+
+
+class OledDisplayEnum(Enum):
+    ESP8266_STATUS_CHECK_TIMEOUT_SEC = 10
+
+    DISPLAY_PAGE_BANNER = 1
+    DISPLAY_PAGE_NOW = 2
+    DISPLAY_PAGE_NEXT_SCHEDULE = 3
+    DISPLAY_PAGE_LAST_RUN = 4
+    DISPLAY_PAGE_ACTIVE = 5
+
+    FONT_CONSOLAS = 'Consolas.ttf'
+    FONT_FONTAWESOME = 'fontawesome-webfont.ttf'
+
+    FONT_SIZE_BANNER = 24
+    FONT_SIZE_HEADER = 12
+    FONT_SIZE_ICON_1 = 10
+    FONT_SIZE_ICON_2 = 12
+    FONT_SIZE_ROW_1 = 10
+    FONT_SIZE_ROW_2 = 15
+    FONT_SIZE_ROW_3 = 12
+    FONT_SIZE_ROW_4 = 10
+    FONT_SIZE_ROW_5 = 9
+
+    FONT_FILL_COLOR = 'white'

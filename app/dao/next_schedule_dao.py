@@ -8,11 +8,11 @@ from app.model.next_schedule import NextSchedule
 class NextScheduleDao:
     def __init__(self):
         self.table = Table(
-            "next_schedules", MetaData(),
-            Column("next_schedule_at", String, nullable=False),
-            Column("duration", Integer, nullable=False, default=0),
-            Column("created_at", String, nullable=True, default=datetime.now),
-            Column("updated_at", String, nullable=True, default=datetime.now)
+            'next_schedules', MetaData(),
+            Column('next_schedule_at', String, nullable=False),
+            Column('duration', Integer, nullable=False, default=0),
+            Column('created_at', String, nullable=True, default=datetime.now),
+            Column('updated_at', String, nullable=True, default=datetime.now)
         )
 
     def select(self, conn):
@@ -29,7 +29,7 @@ class NextScheduleDao:
             return schedule
         except Exception as ex:
             print(ex)
-            # self.logger.fatal("Exception in __start_mqtt_telegrambot: " + str(ex), exc_info=True)
+            # self.logger.fatal('Exception in __start_mqtt_telegrambot: ' + str(ex), exc_info=True)
 
     def upsert(self, conn, schedule):
         try:
@@ -53,7 +53,7 @@ class NextScheduleDao:
             return True
         except Exception as ex:
             print(ex)
-            # self.logger.fatal("Exception in __start_mqtt_telegrambot: " + str(ex), exc_info=True)
+            # self.logger.fatal('Exception in __start_mqtt_telegrambot: ' + str(ex), exc_info=True)
             return False
 
     @staticmethod

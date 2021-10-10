@@ -11,13 +11,13 @@ class Common:
         now = datetime.now().replace(microsecond=0)
 
         if now.hour < 12:
-            time_str = "Morning"
+            time_str = 'Morning'
         elif 12 <= now.hour < 18:
-            time_str = "Afternoon"
+            time_str = 'Afternoon'
         else:
-            time_str = "Evening"
+            time_str = 'Evening'
 
-        return "Good " + time_str + "!"
+        return 'Good ' + time_str + '!'
 
     @staticmethod
     def convert_secs_to_human_format(seconds, short=False):
@@ -49,27 +49,27 @@ class Common:
         diff = (date_time.date() - date.today()).days
 
         if diff == 0:
-            human_date = "Today"
+            human_date = 'Today'
         elif diff == -1:
-            human_date = "Yesterday"
+            human_date = 'Yesterday'
         elif diff == 1:
-            human_date = "Tomorrow"
+            human_date = 'Tomorrow'
         elif diff == 2:
-            human_date = "Day after Tomorrow"
+            human_date = 'Day after Tomorrow'
         elif abs(diff) < 4:
-            human_date = f"{abs(diff)} days ago" if diff < 0 else f"In {abs(diff)} days"
+            human_date = f'{abs(diff)} days ago' if diff < 0 else f'In {abs(diff)} days'
         elif abs(diff) <= 7:
-            last_next = "Last" if diff < 0 else "Next" if diff == 7 else "This"
-            day = date_time.strftime("%A")
-            human_date = f"{last_next} {day}"
+            last_next = 'Last' if diff < 0 else 'Next' if diff == 7 else 'This'
+            day = date_time.strftime('%A')
+            human_date = f'{last_next} {day}'
         else:
-            day = date_time.strftime("%d-%m-%Y")
-            human_date = f"On {day}"
+            day = date_time.strftime('%d-%m-%Y')
+            human_date = f'On {day}'
 
         return human_date
 
     @staticmethod
-    def calculate_next_schedule_and_duration(conn, curr_schedule):
+    def calculate_next_schedule_and_duration(conn, curr_schedule, default_duration):
         schedule_dao = ScheduleDao()
         schedule_objs = schedule_dao.select(conn)
         today_str = curr_schedule.strftime('%d-%m-%Y')
@@ -91,16 +91,12 @@ class Common:
                     break
         else:
             next_schedule = datetime.now().replace(microsecond=0) + timedelta(days=1)
-            # TODO the default duration if not schedule to be parameterized
-            next_duration = 60
+            next_duration = default_duration
 
         return next_schedule, next_duration
 
     @staticmethod
-    def is_internet_connected():
-        # TODO configuration in .env
-
-        ping_url = '1.1.1.1'
+    def is_internet_connected(ping_url):
         command = ['ping', '-c', '1', ping_url]
         return subprocess.call(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL) == 0
 

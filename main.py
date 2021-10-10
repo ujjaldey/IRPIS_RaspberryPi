@@ -26,7 +26,10 @@ class Main:
         self.display = OledDisplay(self.logger, self.config)
         self.irpis = IrpisMain(self.logger, self.config, self.db)
 
-        self.thread_fns = [self.__start_mqtt_telegrambot, self.__start_display_main, self.__start_irpis_main]
+        self.thread_fns = [self.__start_mqtt_client,
+                           self.__start_telegrambot,
+                           self.__start_display_main,
+                           self.__start_irpis_main]
         self.threads = []
 
     def start(self):
@@ -40,16 +43,22 @@ class Main:
         for thread in self.threads:
             thread.join()
 
-    # TODO split this in separate functions and threads
-    def __start_mqtt_telegrambot(self):
-        self.logger.info('Creating new thread for MQTT & TelegramBot')
+    def __start_mqtt_client(self):
+        self.logger.info('Creating new thread for MQTT Client')
 
         try:
             self.mqtt_client.connect()
+        except Exception as ex:
+            self.logger.fatal('Exception in __start_mqtt_client: ' + str(ex), exc_info=True)
+
+    def __start_telegrambot(self):
+        self.logger.info('Creating new thread for TelegramBot')
+
+        try:
             self.telegram_bot.set_mqtt_client(self.mqtt_client)
             self.telegram_bot.start()
         except Exception as ex:
-            self.logger.fatal("Exception in __start_mqtt_telegrambot: " + str(ex), exc_info=True)
+            self.logger.fatal('Exception in __start_telegrambot: ' + str(ex), exc_info=True)
 
     def __start_display_main(self):
         self.logger.info('Creating new thread for Display')
@@ -59,7 +68,7 @@ class Main:
             self.mqtt_client.set_display(self.display)
             self.display.start()
         except Exception as ex:
-            self.logger.fatal("Exception in __start_display_main: " + str(ex), exc_info=True)
+            self.logger.fatal('Exception in __start_display_main: ' + str(ex), exc_info=True)
 
     def __start_irpis_main(self):
         self.logger.info('Creating new thread for IRPIS Main')
@@ -75,10 +84,10 @@ class Main:
             self.irpis.set_mqtt_client(self.mqtt_client)
             self.irpis.start()
         except Exception as ex:
-            self.logger.fatal("Exception in __start_irpis_main: " + str(ex), exc_info=True)
+            self.logger.fatal('Exception in __start_irpis_main: ' + str(ex), exc_info=True)
 
     def terminate(self):
-        self.logger.info("Terminating")
+        self.logger.info('Terminating')
         self.display.cleanup()
 
 

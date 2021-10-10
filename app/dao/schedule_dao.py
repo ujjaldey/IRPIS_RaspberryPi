@@ -8,13 +8,13 @@ from app.model.schedule import Schedule
 class ScheduleDao:
     def __init__(self):
         self.table = Table(
-            "schedules", MetaData(),
-            Column("id", Integer, autoincrement=True, nullable=False, primary_key=True, unique=True),
-            Column("schedule_time", String, nullable=False),
-            Column("duration", Integer, nullable=False, default=0),
-            Column("active", String, nullable=False),
-            Column("created_at", String, nullable=True, default=datetime.now),
-            Column("updated_at", String, nullable=True, default=datetime.now)
+            'schedules', MetaData(),
+            Column('id', Integer, autoincrement=True, nullable=False, primary_key=True, unique=True),
+            Column('schedule_time', String, nullable=False),
+            Column('duration', Integer, nullable=False, default=0),
+            Column('active', String, nullable=False),
+            Column('created_at', String, nullable=True, default=datetime.now),
+            Column('updated_at', String, nullable=True, default=datetime.now)
         )
 
     def select(self, conn):
@@ -43,4 +43,4 @@ class ScheduleDao:
             return schedules
         except Exception as ex:
             print(ex)
-            # self.logger.fatal("Exception in __start_mqtt_telegrambot: " + str(ex), exc_info=True)
+            # self.logger.fatal('Exception in __start_mqtt_telegrambot: ' + str(ex), exc_info=True)

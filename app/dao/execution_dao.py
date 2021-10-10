@@ -8,15 +8,15 @@ from app.model.execution import Execution
 class ExecutionDao:
     def __init__(self):
         self.table = Table(
-            "executions", MetaData(),
-            Column("id", Integer, autoincrement=True, nullable=False, primary_key=True, unique=True),
-            Column("executed_at", String, nullable=False),
-            Column("duration", Integer, nullable=False, default=0),
-            Column("type", String, nullable=False),
-            Column("status", String),
-            Column("error", String),
-            Column("created_at", String, nullable=True, default=datetime.now),
-            Column("updated_at", String, nullable=True, default=datetime.now)
+            'executions', MetaData(),
+            Column('id', Integer, autoincrement=True, nullable=False, primary_key=True, unique=True),
+            Column('executed_at', String, nullable=False),
+            Column('duration', Integer, nullable=False, default=0),
+            Column('type', String, nullable=False),
+            Column('status', String),
+            Column('error', String),
+            Column('created_at', String, nullable=True, default=datetime.now),
+            Column('updated_at', String, nullable=True, default=datetime.now)
         )
 
     def select(self, conn, num_of_rows):
@@ -37,7 +37,7 @@ class ExecutionDao:
             return executions
         except Exception as ex:
             print(ex)
-            # self.logger.fatal("Exception in __start_mqtt_telegrambot: " + str(ex), exc_info=True)
+            # self.logger.fatal('Exception in __start_mqtt_telegrambot: ' + str(ex), exc_info=True)
 
     def select_latest(self, conn):
         try:
@@ -55,7 +55,7 @@ class ExecutionDao:
             return last_execution
         except Exception as ex:
             print(ex)
-            # self.logger.fatal("Exception in __start_mqtt_telegrambot: " + str(ex), exc_info=True)
+            # self.logger.fatal('Exception in __start_mqtt_telegrambot: ' + str(ex), exc_info=True)
 
     def insert(self, conn, execution):
         stmt = self.table \

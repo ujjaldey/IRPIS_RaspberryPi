@@ -5,9 +5,6 @@ class Config:
     def __init__(self):
         self.config = dotenv_values('.env')
 
-    def get_application_name(self):
-        return self.config['APPLICATION_NAME'].upper()
-
     def get_display_change_duration_sec(self):
         return int(self.config['DISPLAY_CHANGE_DURATION_SEC'])
 
@@ -22,6 +19,9 @@ class Config:
 
     def get_telegram_chat_id(self):
         return self.config['TELEGRAM_CHAT_ID']
+
+    def get_ping_url(self):
+        return self.config['PING_URL']
 
     def get_mqtt_server(self):
         return self.config['MQTT_SERVER']
@@ -41,8 +41,11 @@ class Config:
     def get_mqtt_response_topic(self):
         return self.config['MQTT_RESPONSE_TOPIC']
 
-    def get_mqtt_sender(self):
-        return self.config['MQTT_SENDER']
+    def get_mqtt_broker(self):
+        return self.config['MQTT_BROKER']
+
+    def get_mqtt_client(self):
+        return self.config['MQTT_CLIENT']
 
     def get_database_connection(self):
         return self.config['DATABASE_CONNECTION']
@@ -52,3 +55,6 @@ class Config:
 
     def get_history_command_num_rows(self):
         return int(self.config['HISTORY_COMMAND_NUM_ROWS'])
+
+    def get_default_payload_duration_sec(self):
+        return int(self.config['DEFAULT_PAYLOAD_DURATION_SEC'])

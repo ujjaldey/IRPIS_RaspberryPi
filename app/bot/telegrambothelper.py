@@ -9,13 +9,16 @@ from telegram.ext import CallbackContext
 from app.dao.execution_dao import ExecutionDao
 from app.dao.next_schedule_dao import NextScheduleDao
 from app.dao.schedule_dao import ScheduleDao
+from app.enum.mqttclientenum import MqttClientEnum
 from app.model.next_schedule import NextSchedule
+from app.enum.irpisenum import IrpisEnum
 
 
 class TelegramBotHelper:
     def _greet_message(self):
+        app_str = f'{IrpisEnum.APPLICATION_DESC.value} ({IrpisEnum.APPLICATION_NAME.value})'
         self.updater.bot.send_message(chat_id=self.config.get_telegram_chat_id(),
-                                      text=self.common.greet_time() + '\n<b><i>IOT Remote Plant Irrigation System (IRPIS)</i></b> is initiating...')
+                                      text=f'Hi there! {self.common.greet_time()}\n<b>{app_str}</b> is initiating...')
 
     def _status(self, update: Update, context: CallbackContext):
         self.mqtt_client.esp8266_status()
@@ -36,7 +39,7 @@ class TelegramBotHelper:
                 status = response['status']
                 duration = response['duration']
                 duration_str = f' for {self.common.convert_secs_to_human_format(duration)}' \
-                    if status == 'ON' else ''  # TODO reuse enum
+                    if status == MqttClientEnum.STATUS_ON.value else ''
                 payload_msg = f'Currently the payload is {status.lower()}{duration_str}.'
             else:
                 esp8266_response_msg = 'ESP8266 is having some issues'
@@ -44,7 +47,7 @@ class TelegramBotHelper:
         else:
             esp8266_response_msg = 'ESP8266 is either down or not accessible'
 
-        internet_status = self.common.is_internet_connected()
+        internet_status = self.common.is_internet_connected(self.config.get_ping_url())
         internet_response_msg = 'Internet is ' + ('connected' if internet_status else 'not connected')
 
         execution_dao = ExecutionDao()
@@ -87,7 +90,7 @@ class TelegramBotHelper:
             success = False
         else:
             try:
-                duration_str = " ".join(context.args)
+                duration_str = ' '.join(context.args)
                 duration = self.__convert_duration_to_secs(duration_str.lower())
 
                 if duration > 0:
@@ -151,8 +154,9 @@ class TelegramBotHelper:
 
         curr_schedule_time = curr_schedule.next_schedule_at.strftime('%H:%M')
 
-        next_schedule, next_duration = self.common.calculate_next_schedule_and_duration(self.conn,
-                                                                                        curr_schedule.next_schedule_at)
+        next_schedule, next_duration = \
+            self.common.calculate_next_schedule_and_duration(self.conn, curr_schedule.next_schedule_at,
+                                                             self.config.get_default_payload_duration_sec())
         new_schedule_time = next_schedule.strftime('%H:%M')
 
         schedule = NextSchedule(
@@ -176,7 +180,7 @@ class TelegramBotHelper:
         executions = execution_dao.select(self.conn, num_of_rows)
 
         if len(executions) > 0:
-            log_str = ""
+            log_str = ''
             for execution in executions:
                 execution_time = execution.executed_at.strftime('%H:%M')
                 status_and_error = execution.status.capitalize() + \
@@ -213,7 +217,7 @@ class TelegramBotHelper:
         next_schedule_time = next_schedule.next_schedule_at.strftime('%H:%M')
 
         if len(sorted_schedules) > 0:
-            schedule_str = ""
+            schedule_str = ''
             for schedule in sorted_schedules:
                 schedule_time = schedule[0].strftime('%H:%M')
                 schedule_str += f'\n{schedule_time} | ' + \
@@ -265,8 +269,8 @@ class TelegramBotHelper:
     def _reboot_confirm(update: Update, context: CallbackContext):
         keyboard = [
             [
-                InlineKeyboardButton("Yes", callback_data='reboot_Y'),
-                InlineKeyboardButton("No", callback_data='reboot_N'),
+                InlineKeyboardButton('Yes', callback_data='reboot_Y'),
+                InlineKeyboardButton('No', callback_data='reboot_N'),
             ],
         ]
 
@@ -278,8 +282,8 @@ class TelegramBotHelper:
     def _shutdown_confirm(update: Update, context: CallbackContext):
         keyboard = [
             [
-                InlineKeyboardButton("Yes", callback_data='shutdown_Y'),
-                InlineKeyboardButton("No", callback_data='shutdown_N'),
+                InlineKeyboardButton('Yes', callback_data='shutdown_Y'),
+                InlineKeyboardButton('No', callback_data='shutdown_N'),
             ],
         ]
 
@@ -293,13 +297,13 @@ class TelegramBotHelper:
 
     @staticmethod
     def __convert_duration_to_secs(duration_str):
-        rep = {"h": ["hours", "hour", "hrs", "hr"],
-               "m": ["minutes", "minute", "mins", "min", "mis", "mi"],
-               "s": ["seconds", "second", "secs", "sec"],
+        rep = {'h': ['hours', 'hour', 'hrs', 'hr'],
+               'm': ['minutes', 'minute', 'mins', 'min', 'mis', 'mi'],
+               's': ['seconds', 'second', 'secs', 'sec'],
                }
 
         rep = dict((re.escape(v), k) for k, x in rep.items() for v in x)
-        pattern = re.compile("|".join(rep.keys()))
+        pattern = re.compile('|'.join(rep.keys()))
         duration_str = pattern.sub(lambda m: rep[re.escape(m.group(0))], duration_str)
 
         midnight_plus_time = parser.parse(duration_str)
@@ -323,5 +327,5 @@ class TelegramBotHelper:
         for unit, div in duration_units:
             amount, seconds = divmod(int(seconds), div)
             if amount > 0:
-                parts.append('{} {}{}'.format(amount, unit, "" if amount == 1 else "s"))
+                parts.append('{} {}{}'.format(amount, unit, '' if amount == 1 else 's'))
         return ' '.join(parts)

@@ -23,7 +23,6 @@ class MqttClient(MqttClientHelper):
         self.__esp8266_response = None
 
     def set_esp8266_response(self, esp8266_response):
-        print("setting---", esp8266_response)
         self.__esp8266_response = esp8266_response
 
     def get_esp8266_response(self):
