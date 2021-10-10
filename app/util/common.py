@@ -1,4 +1,5 @@
 import os
+import re
 import subprocess
 from datetime import date, datetime, timedelta
 
@@ -18,6 +19,37 @@ class Common:
             time_str = 'Evening'
 
         return 'Good ' + time_str + '!'
+
+    @staticmethod
+    def convert_duration_to_secs(duration_str):
+        literal_dict = {
+            'h': ['hours', 'hour', 'hrs', 'hr'],
+            'm': ['minutes', 'minute', 'mins', 'min', 'mis', 'mi'],
+            's': ['seconds', 'second', 'secs', 'sec'],
+        }
+
+        secs_dict = {
+            'h': 3600,
+            'm': 60,
+            's': 1
+        }
+
+        time_literals = dict((re.escape(v), k) for k, x in literal_dict.items() for v in x)
+        pattern = re.compile('|'.join(time_literals.keys()))
+        duration_str = pattern.sub(lambda m: time_literals[re.escape(m.group(0))], duration_str)
+        duration_str = duration_str.replace(' ', '')
+
+        for hms in literal_dict.keys():
+            duration_str = duration_str.replace(hms, hms + ' ')
+
+        seconds = 0
+        for duration_elem in duration_str.rstrip().split(' '):
+            for (key, value) in secs_dict.items():
+                if duration_elem[-1] == key:
+                    seconds += int(duration_elem[:len(duration_elem) - 1]) * value
+                    break
+
+        return seconds
 
     @staticmethod
     def convert_secs_to_human_format(seconds, short=False):

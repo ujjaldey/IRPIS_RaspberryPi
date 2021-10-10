@@ -1,17 +1,15 @@
-import re
 from datetime import datetime
 from time import sleep, time
 
-from dateutil import parser
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CallbackContext
 
 from app.dao.execution_dao import ExecutionDao
 from app.dao.next_schedule_dao import NextScheduleDao
 from app.dao.schedule_dao import ScheduleDao
+from app.enum.irpisenum import IrpisEnum
 from app.enum.mqttclientenum import MqttClientEnum
 from app.model.next_schedule import NextSchedule
-from app.enum.irpisenum import IrpisEnum
 
 
 class TelegramBotHelper:
@@ -52,11 +50,15 @@ class TelegramBotHelper:
 
         execution_dao = ExecutionDao()
         execution = execution_dao.select_latest(self.conn)
-        last_execution_at = self.common.convert_date_to_human_format(
-            execution.executed_at) + ' at ' + execution.executed_at.strftime('%H:%M')
-        last_execution_msg = f'Last execution: {last_execution_at} for ' \
-                             f'{self.common.convert_secs_to_human_format(execution.duration, True)} ' \
-                             f'({execution.type.capitalize()})'
+
+        if execution.executed_at:
+            last_execution_at = self.common.convert_date_to_human_format(
+                execution.executed_at) + ' at ' + execution.executed_at.strftime('%H:%M')
+            last_execution_msg = f'Last execution: {last_execution_at} for ' \
+                                 f'{self.common.convert_secs_to_human_format(execution.duration, True)} ' \
+                                 f'({execution.type.capitalize()})'
+        else:
+            last_execution_msg = 'No previous executions'
 
         next_schedule_dao = NextScheduleDao()
         schedule = next_schedule_dao.select(self.conn)
@@ -91,7 +93,7 @@ class TelegramBotHelper:
         else:
             try:
                 duration_str = ' '.join(context.args)
-                duration = self.__convert_duration_to_secs(duration_str.lower())
+                duration = self.common.convert_duration_to_secs(duration_str.lower())
 
                 if duration > 0:
                     response_msg = \
@@ -294,22 +296,6 @@ class TelegramBotHelper:
 
     def _send_response(self, message):
         self.updater.bot.send_message(chat_id=self.config.get_telegram_chat_id(), text=message)
-
-    @staticmethod
-    def __convert_duration_to_secs(duration_str):
-        rep = {'h': ['hours', 'hour', 'hrs', 'hr'],
-               'm': ['minutes', 'minute', 'mins', 'min', 'mis', 'mi'],
-               's': ['seconds', 'second', 'secs', 'sec'],
-               }
-
-        rep = dict((re.escape(v), k) for k, x in rep.items() for v in x)
-        pattern = re.compile('|'.join(rep.keys()))
-        duration_str = pattern.sub(lambda m: rep[re.escape(m.group(0))], duration_str)
-
-        midnight_plus_time = parser.parse(duration_str)
-        midnight: datetime = datetime.combine(datetime.today(), datetime.min.time())
-        timedelta = midnight_plus_time - midnight
-        return timedelta.seconds
 
     @staticmethod
     def __convert_secs_to_human_format(seconds):
