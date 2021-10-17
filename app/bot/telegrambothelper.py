@@ -1,3 +1,5 @@
+import inspect
+import textwrap
 from datetime import datetime
 from time import sleep, time
 
@@ -14,9 +16,139 @@ from app.model.next_schedule import NextSchedule
 
 class TelegramBotHelper:
     def _greet_message(self):
-        app_str = f'{IrpisEnum.APPLICATION_DESC.value} ({IrpisEnum.APPLICATION_NAME.value})'
-        self.updater.bot.send_message(chat_id=self.config.get_telegram_chat_id(),
-                                      text=f'Hi there! {self.common.greet_time()}\n<b>{app_str}</b> is initiating...')
+        self.logger.info('_greet_message is called')
+        app_desc = IrpisEnum.APPLICATION_DESC.value
+        app_name = IrpisEnum.APPLICATION_NAME.value
+
+        response_msg = (f'Hi there! <b>{self.common.greet_time()}!</b>\n\n'
+                        f'Initiating <b><i>{app_desc} ({app_name})</i></b>...\n\n'
+                        'Enter /help for a list of commands...\n')
+
+        self.updater.bot.send_message(chat_id=self.config.get_telegram_chat_id(), text=response_msg)
+
+    def _help(self, update: Update, context: CallbackContext):
+        self.logger.info('_help is called')
+
+        response_msg = ('I can help you trigger and control the <b><i>IRPIS</i></b> application via Telegram.\n\n'
+                        'You can control me by sending these commands:\n\n'
+                        '/help - show the list of commands\n\n'
+                        '<b>Control:</b>\n'
+                        '/wakeup - wake up the display\n'
+                        '/on - turn on the payload for specific time\n'
+                        '/off - turn off the payload\n'
+                        '/skip - skip the next execution\n\n'
+                        '<b>History:</b>\n'
+                        '/status - show the current status\n'
+                        '/schedule - show the list of schedules\n'
+                        '/next - show the next schedule details\n'
+                        '/last - show the last execution details\n'
+                        '/history - list the history of executions\n\n'
+                        '<b>Terminate:</b>\n'
+                        '/reboot - reboot the controller unit (Raspberry Pi)\n'
+                        '/shutdown - shutdown the controller unit (Raspberry Pi)\n')
+
+        context.bot.send_message(chat_id=update.effective_chat.id, text=response_msg)
+
+        cmd_keyboard = [
+            [
+                InlineKeyboardButton('/wakeup', callback_data='help_wakeup'),
+                InlineKeyboardButton('/on', callback_data='help_on'),
+                InlineKeyboardButton('/off', callback_data='help_off'),
+                InlineKeyboardButton('/skip', callback_data='help_skip'),
+            ],
+            [
+                InlineKeyboardButton('/status', callback_data='help_status'),
+                InlineKeyboardButton('/schedule', callback_data='help_schedule'),
+                InlineKeyboardButton('/next', callback_data='help_next'),
+                InlineKeyboardButton('/last', callback_data='help_last'),
+                InlineKeyboardButton('/history', callback_data='help_history'),
+            ],
+            [
+                InlineKeyboardButton('/reboot', callback_data='help_reboot'),
+                InlineKeyboardButton('/shutdown', callback_data='help_shutdown'),
+            ],
+        ]
+
+        reply_markup = InlineKeyboardMarkup(cmd_keyboard)
+
+        response_msg = 'Select a command for detailed help:'
+
+        context.bot.send_message(chat_id=update.effective_chat.id, text=response_msg, reply_markup=reply_markup)
+
+    def _detailed_help(self, update: Update, context: CallbackContext):
+        query = update.callback_query
+        query.answer()
+
+        help_topic = query.data.split('_')[1]
+
+        if help_topic == 'wakeup':
+            response_msg = (
+                '<b>Command /wakeup:</b>\n\n'
+                'Wake up the display of the controller unit. You can change the display timeout duration by changing '
+                'the <code>DISPLAY_TIMEOUT_SEC</code> parameter in <code>.env</code> file.\n')
+        elif help_topic == 'on':
+            response_msg = (
+                '<b>Command /on:</b>\n\n'
+                'Turn on the irrigation payload (ESP8266) for the specified duration. Pass the duration as an '
+                'argument with the command. Throw error if the payload is already in <code>ON</code> state.\n\n'
+                'Examples:\n'
+                '<code>/on 30sec</code>\n'
+                '<code>/on 90 sec</code>\n'
+                '<code>/on 1m 10s</code>\n'
+                '<code>/on 2 min 20 sec</code>\n'
+                '<code>/on 1h2m3s</code>\n\n'
+                'Supported time notations:\n'
+                'seconds: <code>s</code>, <code>sec</code>, <code>secs</code>, <code>second</code>, '
+                '<code>seconds</code>\n'
+                'minutes: <code>m</code>, <code>mi</code>, <code>mis</code>, <code>min</code>, <code>mins</code>, '
+                '<code>minute</code>, <code>minutes</code>\n'
+                'hours: <code>h</code>, <code>hr</code>, <code>hrs</code>, <code>hour</code>, <code>hours</code>\n'
+            )
+        elif help_topic == 'off':
+            response_msg = (
+                '<b>Command /off:</b>\n\n'
+                'Turn off the irrigation payload unit (ESP8266). Throw error if the payload is already in '
+                '<code>OFF</code> state.\n\n')
+        elif help_topic == 'skip':
+            response_msg = (
+                '<b>Command /skip:</b>\n\n'
+                'Skip the next scheduled execution.\n\n')
+        elif help_topic == 'status':
+            response_msg = (
+                '<b>Command /status:</b>\n\n'
+                'Show the current payload status of the application along with the details of the last execution '
+                'and next schedule.\n\n')
+        elif help_topic == 'schedule':
+            response_msg = (
+                '<b>Command /schedule:</b>\n\n'
+                'Show the list of schedules along with the durations.')
+        elif help_topic == 'next':
+            response_msg = (
+                '<b>Command /next:</b>\n\n'
+                'Show the next scheduled execution time and duration.')
+        elif help_topic == 'last':
+            response_msg = (
+                '<b>Command /last:</b>\n\n'
+                'Show the last execution time and duration.')
+        elif help_topic == 'history':
+            response_msg = (
+                '<b>Command /history:</b>\n\n'
+                'Show the list of previous execution times and durations. You can change the display timeout '
+                'duration by changing the <code>HISTORY_COMMAND_NUM_ROWS</code> parameter in <code>.env</code> file.\n')
+        elif help_topic == 'reboot':
+            response_msg = (
+                '<b>Command /reboot:</b>\n\n'
+                'Reboot the controller unit (Raspberry Pi). You need to reboot the payload unit (ESP8266) manually, '
+                'if needed.')
+        elif help_topic == 'shutdown':
+            response_msg = (
+                '<b>Command /shutdown:</b>\n\n'
+                'Shutdown the controller unit (Raspberry Pi). Once shutdown, you have to turn on the controller unit '
+                '(Raspberry Pi) manually.')
+        else:
+            response_msg = 'Invalid command for help'
+
+        query.edit_message_text(text=response_msg)
 
     def _status(self, update: Update, context: CallbackContext):
         self.mqtt_client.esp8266_status()
@@ -78,6 +210,7 @@ class TelegramBotHelper:
         self.display.display_on_off(True)
 
     def _wakeup(self, update: Update, context: CallbackContext):
+        self.logger.info('_wakeup is called')
         response_msg = 'OK. Turning on the display...'
         context.bot.send_message(chat_id=self.config.get_telegram_chat_id(), text=response_msg)
         self.display.display_on_off(True)
@@ -266,6 +399,13 @@ class TelegramBotHelper:
         else:
             response_msg = 'Ok. Command cancelled!'
             query.edit_message_text(text=response_msg)
+
+    def _invalid_command(self, update: Update, context: CallbackContext):
+        self.logger.info('_invalid_command is called')
+
+        response_msg = f'Opps! I didn\'t get your command {update.message.text}\n\nTry /help for a list of commands'
+
+        context.bot.send_message(chat_id=update.effective_chat.id, text=response_msg)
 
     @staticmethod
     def _reboot_confirm(update: Update, context: CallbackContext):

@@ -18,7 +18,7 @@ class Common:
         else:
             time_str = 'Evening'
 
-        return 'Good ' + time_str + '!'
+        return 'Good ' + time_str
 
     @staticmethod
     def convert_duration_to_secs(duration_str):
@@ -54,7 +54,7 @@ class Common:
     @staticmethod
     def convert_secs_to_human_format(seconds, short=False):
         input_seconds = seconds
-        day_str = 'day' if seconds < 3600 else 'd'
+        day_str = 'day' if not short else 'd' if seconds < 3600 else 'd'
         hr_str = 'hour' if not short else 'hr' if seconds < 3600 else 'h'
         min_str = 'minute' if not short else 'min' if seconds < 3600 else 'm'
         sec_str = 'second' if not short else 'sec' if seconds < 3600 else 's'
