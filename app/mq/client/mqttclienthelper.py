@@ -25,6 +25,7 @@ class MqttClientHelper:
                                     resp_type, resp_sender):
             if resp_type == MqttClientEnum.TYPE_COMMAND.value:
                 success_str = '' if resp_success else 'could not be '
+                error_str = '' if resp_success else 'Error: '
                 status_str = resp_status
 
                 if status_str == MqttClientEnum.STATUS_ON.value:
@@ -33,12 +34,17 @@ class MqttClientHelper:
                 else:
                     status_str_with_duration = status_str.lower()
 
-                message = f'Irrigation {success_str}turned {status_str_with_duration}!'
+                message = f'{error_str}Irrigation payload {success_str}turned {status_str_with_duration}.'
 
                 duration = int(resp_duration)
 
                 if not resp_success:
-                    message += '\nError: ' + resp_message
+                    message += ' ' + resp_message. \
+                        replace(' ' + MqttClientEnum.STATUS_ON.value.lower(),
+                                ' <code>' + MqttClientEnum.STATUS_ON.value + '</code>'). \
+                        replace(' ' + MqttClientEnum.STATUS_OFF.value.lower(),
+                                ' <code>' + MqttClientEnum.STATUS_OFF.value + '</code>') + '!'
+
                     success, execution_id = self.execution_dao.update_status(self.conn, resp_execution_id, 'FAILED',
                                                                              resp_message)
                 else:

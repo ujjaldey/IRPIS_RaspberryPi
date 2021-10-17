@@ -3,6 +3,7 @@ import textwrap
 from datetime import datetime
 from time import sleep, time
 
+from prettytable import PrettyTable
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CallbackContext
 
@@ -154,7 +155,7 @@ class TelegramBotHelper:
         self.mqtt_client.esp8266_status()
 
         app_uptime = time() - self.app_start_time
-        app_uptime_msg = f'The application is up for {self.common.convert_secs_to_human_format(app_uptime)}'
+        app_uptime_msg = f'The application is up for {self.common.convert_secs_to_human_format(app_uptime)}.'
 
         for i in range(1, 10):
             response = self.mqtt_client.get_esp8266_response()
@@ -165,20 +166,21 @@ class TelegramBotHelper:
 
         if response:
             if response['success']:
-                esp8266_response_msg = 'ESP8266 is up and running'
+                esp8266_response_msg = 'ESP8266 is up and running.'
                 status = response['status']
                 duration = response['duration']
                 duration_str = f' for {self.common.convert_secs_to_human_format(duration)}' \
                     if status == MqttClientEnum.STATUS_ON.value else ''
-                payload_msg = f'Currently the payload is {status.lower()}{duration_str}.'
+                payload_msg = f'Currently the payload is <code>{status}</code>{duration_str}.'
             else:
-                esp8266_response_msg = 'ESP8266 is having some issues'
+                esp8266_response_msg = 'Error: ESP8266 is having some issues.'
                 payload_msg = ''
         else:
-            esp8266_response_msg = 'ESP8266 is either down or not accessible'
+            esp8266_response_msg = 'Error: ESP8266 is either down or not accessible.'
 
         internet_status = self.common.is_internet_connected(self.config.get_ping_url())
-        internet_response_msg = 'Internet is ' + ('connected' if internet_status else 'not connected')
+        internet_response_msg = ('' if internet_status else 'Error: ') + 'Internet is ' + \
+                                ('connected' if internet_status else 'not connected') + '.'
 
         execution_dao = ExecutionDao()
         execution = execution_dao.select_latest(self.conn)
@@ -186,11 +188,11 @@ class TelegramBotHelper:
         if execution.executed_at:
             last_execution_at = self.common.convert_date_to_human_format(
                 execution.executed_at) + ' at ' + execution.executed_at.strftime('%H:%M')
-            last_execution_msg = f'Last execution: {last_execution_at} for ' \
+            last_execution_msg = f'Last execution was {last_execution_at} for ' \
                                  f'{self.common.convert_secs_to_human_format(execution.duration, True)} ' \
-                                 f'({execution.type.capitalize()})'
+                                 f'({execution.type.capitalize()}).'
         else:
-            last_execution_msg = 'No previous executions'
+            last_execution_msg = 'No previous executions.'
 
         next_schedule_dao = NextScheduleDao()
         schedule = next_schedule_dao.select(self.conn)
@@ -198,14 +200,21 @@ class TelegramBotHelper:
         next_schedule, duration = (schedule.next_schedule_at, schedule.duration) if schedule else (None, 0)
         next_schedule_at = self.common.convert_date_to_human_format(next_schedule) + ' at ' + next_schedule.strftime(
             '%H:%M')
+
         if next_schedule:
-            next_schedule_msg = f'Next schedule: {next_schedule_at} for ' \
-                                f'{self.common.convert_secs_to_human_format(duration, True)}'
+            next_schedule_msg = f'Next schedule is {next_schedule_at} for ' \
+                                f'{self.common.convert_secs_to_human_format(duration, True)}.'
         else:
             next_schedule_msg = ''
 
-        response_msg = f'Status:\n{app_uptime_msg}\n{esp8266_response_msg}\n{internet_response_msg}' \
-                       f'\n{payload_msg}\n{last_execution_msg}\n{next_schedule_msg}'
+        response_msg = (
+            f'{app_uptime_msg}\n\n'
+            f'{esp8266_response_msg}\n'
+            f'{internet_response_msg}\n\n'
+            f'{payload_msg}\n\n'
+            f'{last_execution_msg}\n'
+            f'{next_schedule_msg}')
+
         context.bot.send_message(chat_id=self.config.get_telegram_chat_id(), text=response_msg)
         self.display.display_on_off(True)
 
@@ -221,7 +230,7 @@ class TelegramBotHelper:
         duration = 0
 
         if len(context.args) < 1:
-            response_msg = 'Enter the duration!'
+            response_msg = 'Error: No duration entered!\n\nEnter /help for help.'
             success = False
         else:
             try:
@@ -230,13 +239,13 @@ class TelegramBotHelper:
 
                 if duration > 0:
                     response_msg = \
-                        f'OK. Turning the irrigation on for {self.common.convert_secs_to_human_format(duration)}...'
+                        f'OK. Turning the irrigation payload <code>ON</code> for {self.common.convert_secs_to_human_format(duration)}...'
                     success = True
                 else:
-                    response_msg = 'Invalid duration!'
+                    response_msg = 'Error: Invalid duration!\n\nEnter /help for help.'
                     success = False
             except Exception as ex:
-                response_msg = 'Invalid duration!'
+                response_msg = 'Error: Invalid duration!\n\nEnter /help for help.'
                 success = False
 
         context.bot.send_message(chat_id=self.config.get_telegram_chat_id(), text=response_msg)
@@ -247,7 +256,7 @@ class TelegramBotHelper:
     def _off(self, update: Update, context: CallbackContext):
         self.logger.info('_off is called')
 
-        response_msg = 'OK. Turning the irrigation off...'
+        response_msg = 'OK. Turning the irrigation payload <code>OFF</code>...'
         context.bot.send_message(chat_id=self.config.get_telegram_chat_id(), text=response_msg)
 
         self.mqtt_client.turn_off_payload()
@@ -300,11 +309,11 @@ class TelegramBotHelper:
             updated_at=datetime.now().replace(microsecond=0))
         success = next_schedule_dao.upsert(self.conn, schedule)
 
-        response_msg = f'Skipped schedule: {self.common.convert_date_to_human_format(curr_schedule_at)} at ' + \
-                       f'{curr_schedule_time} for ' + \
-                       f'{self.common.convert_secs_to_human_format(curr_schedule.duration)}' + \
-                       f'\nNew schedule: {self.common.convert_date_to_human_format(next_schedule)} at ' + \
-                       f'{new_schedule_time} for {self.common.convert_secs_to_human_format(next_duration)}'
+        response_msg = (
+            f'Ok. Skipped the next schedule for {self.common.convert_date_to_human_format(curr_schedule_at)} '
+            f'at {curr_schedule_time} for {self.common.convert_secs_to_human_format(curr_schedule.duration)}\n\n'
+            f'New schedule is <b>{self.common.convert_date_to_human_format(next_schedule)}</b> at <b>'
+            f'{new_schedule_time}</b> for <b>{self.common.convert_secs_to_human_format(next_duration)}</b>.')
         context.bot.send_message(chat_id=self.config.get_telegram_chat_id(), text=response_msg)
 
     def _history(self, update: Update, context: CallbackContext):
@@ -337,6 +346,8 @@ class TelegramBotHelper:
     def _schedule(self, update: Update, context: CallbackContext):
         self.logger.info('_schedule is called')
 
+        table = PrettyTable()
+
         schedule_dao = ScheduleDao()
         schedule_objs = schedule_dao.select(self.conn)
         today = datetime.now().replace(microsecond=0)
@@ -352,21 +363,23 @@ class TelegramBotHelper:
         next_schedule_time = next_schedule.next_schedule_at.strftime('%H:%M')
 
         if len(sorted_schedules) > 0:
-            schedule_str = ''
+            table.field_names = ['Time', 'Duration']
+
             for schedule in sorted_schedules:
                 schedule_time = schedule[0].strftime('%H:%M')
-                schedule_str += f'\n{schedule_time} | ' + \
-                                f'{self.common.convert_secs_to_human_format(schedule[1], True)}' + \
-                                (' *' if schedule_time == next_schedule_time else '')
+                schedule_time = schedule_time + ' #' if schedule_time == next_schedule_time else schedule_time
 
-            response_msg = f'Schedules: {schedule_str}\n\n' + \
-                           '* Next Schedule: ' + \
-                           f'{self.common.convert_date_to_human_format(next_schedule.next_schedule_at)} at ' + \
-                           f'{next_schedule_time}'
+                table.add_row([schedule_time, self.common.convert_secs_to_human_format(schedule[1], True)])
+
+            table.align = "l"
+
+            response_msg = (
+                f'List of schedules:\n\n<pre>{table}</pre>\n\n'
+                '<code>#</code> Next Schedule is '
+                f'<b>{self.common.convert_date_to_human_format(next_schedule.next_schedule_at)}</b> at '
+                f'<b>{next_schedule_time}</b>')
         else:
             response_msg = 'No schedules'
-
-            # TODO convert to table
 
         context.bot.send_message(chat_id=self.config.get_telegram_chat_id(), text=response_msg)
 
