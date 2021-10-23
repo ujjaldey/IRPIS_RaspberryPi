@@ -10,7 +10,6 @@ from app.dao.next_schedule_dao import NextScheduleDao
 from app.dao.schedule_dao import ScheduleDao
 from app.enum.irpisenum import IrpisEnum
 from app.enum.mqttclientenum import MqttClientEnum
-from app.model.next_schedule import NextSchedule
 
 
 class TelegramBotHelper:
@@ -294,22 +293,11 @@ class TelegramBotHelper:
     def _skip(self, update: Update, context: CallbackContext):
         self.logger.info('_skip is called')
 
-        next_schedule_dao = NextScheduleDao()
-        curr_schedule = next_schedule_dao.select(self.conn)
+        curr_schedule, next_schedule, next_duration, success = self.common.skip_next_execution(self.conn, self.config)
+
         curr_schedule_at = curr_schedule.next_schedule_at
-
         curr_schedule_time = curr_schedule.next_schedule_at.strftime('%H:%M')
-
-        next_schedule, next_duration = \
-            self.common.calculate_next_schedule_and_duration(self.conn, curr_schedule.next_schedule_at,
-                                                             self.config.get_default_payload_duration_sec())
         new_schedule_time = next_schedule.strftime('%H:%M')
-
-        schedule = NextSchedule(
-            next_schedule_at=next_schedule, duration=next_duration,
-            created_at=datetime.now().replace(microsecond=0),
-            updated_at=datetime.now().replace(microsecond=0))
-        success = next_schedule_dao.upsert(self.conn, schedule)
 
         response_msg = (
             f'Ok. The next schedule for {self.common.convert_date_to_human_format(curr_schedule_at)} '

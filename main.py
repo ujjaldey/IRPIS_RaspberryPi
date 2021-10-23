@@ -6,6 +6,7 @@ from RPi import GPIO
 
 from app.bot.telegrambot import TelegramBot
 from app.display.oleddisplay import OledDisplay
+from app.input.actionbutton import ActionButton
 from app.irpis.irpismain import IrpisMain
 from app.mq.client.mqttclient import MqttClient
 from app.util.config import Config
@@ -28,11 +29,13 @@ class Main:
         self.telegram_bot.add_handlers()
         self.display = OledDisplay(self.logger, self.config)
         self.irpis = IrpisMain(self.logger, self.config, self.db)
+        self.action_button = ActionButton(self.logger, self.config, self.db, self.mqtt_client, self.display)
 
         self.thread_fns = [self.__start_mqtt_client,
                            self.__start_telegrambot,
                            self.__start_display_main,
-                           self.__start_irpis_main]
+                           self.__start_irpis_main,
+                           self.__start_action_button]
         self.threads = []
 
     def is_process_already_running(self):
@@ -103,6 +106,14 @@ class Main:
             self.irpis.start()
         except Exception as ex:
             self.logger.fatal('Exception in __start_irpis_main: ' + str(ex), exc_info=True)
+
+    def __start_action_button(self):
+        self.logger.info('Creating new thread for buttons')
+
+        try:
+            self.action_button.register_buttons()
+        except Exception as ex:
+            self.logger.fatal('Exception in __start_action_button: ' + str(ex), exc_info=True)
 
     def terminate(self):
         self.logger.info('Terminating')

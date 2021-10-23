@@ -3,7 +3,9 @@ import re
 import subprocess
 from datetime import date, datetime, timedelta
 
+from app.dao.next_schedule_dao import NextScheduleDao
 from app.dao.schedule_dao import ScheduleDao
+from app.model.next_schedule import NextSchedule
 
 
 class Common:
@@ -131,6 +133,21 @@ class Common:
     def is_internet_connected(ping_url):
         command = ['ping', '-c', '1', ping_url]
         return subprocess.call(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL) == 0
+
+    def skip_next_execution(self, conn, config):
+        next_schedule_dao = NextScheduleDao()
+        curr_schedule = next_schedule_dao.select(conn)
+
+        next_schedule, next_duration = \
+            self.calculate_next_schedule_and_duration(conn, curr_schedule.next_schedule_at,
+                                                      config.get_default_payload_duration_sec())
+
+        schedule = NextSchedule(
+            next_schedule_at=next_schedule, duration=next_duration,
+            created_at=datetime.now().replace(microsecond=0),
+            updated_at=datetime.now().replace(microsecond=0))
+        success = next_schedule_dao.upsert(conn, schedule)
+        return curr_schedule, next_schedule, next_duration, success
 
     @staticmethod
     def reboot():
