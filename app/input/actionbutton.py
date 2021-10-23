@@ -49,3 +49,4 @@ class ActionButton:
         self.logger.info("__on_skip_button_clicked is called")
 
         curr_schedule, next_schedule, next_duration, success = self.common.skip_next_execution(self.conn, self.config)
+        self.display.display_on_off(True)
