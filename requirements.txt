@@ -1,0 +1,5 @@
+python-dotenv==0.19.0
+python-telegram-bot==13.7
+SQLAlchemy==1.4.25
+prettytable==2.2.1
+gpiozero==1.6.2
